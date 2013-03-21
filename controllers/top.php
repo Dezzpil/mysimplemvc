@@ -8,7 +8,13 @@
  * @author Dezzpil
  */
 class controller_top extends core_controller
-{ 
+{
+	// ключ для массива js-ников
+    const KEY_ARRAY_JS = 'js';
+    
+    // ключ для массив less-ников
+    const KEY_ARRAY_CSS = 'css';
+
     function before()
     {   
 		// установить шаблон

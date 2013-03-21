@@ -16,21 +16,21 @@ class controller_index extends controller_top
     function index()
     {
         $data = array(
-			'greeteings' => 'Hello, world',
+			'greetings' => 'Hello, world',
 			'foo' => 'bar'
 		);
         
         // ниже следует пример добавления js и less файлов для представления
         $data[parent::KEY_ARRAY_JS][] = ZONE_PATH.'/'.$this->name.'/index.js';
-        $data[parent::KEY_ARRAY_LESS][] = ZONE_PATH.'/'.$this->name.'/index.css';
+        $data[parent::KEY_ARRAY_CSS][] = ZONE_PATH.'/'.$this->name.'/index.css';
         
-        view::set_view('index', $data);
+        view::set_view($this->name.'/index', $data);
     }
     
     function after()
     {
         parent::after();
-    } 
+    }
 }
 
 ?>

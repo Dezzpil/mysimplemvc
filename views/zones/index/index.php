@@ -1,5 +1,5 @@
 
-<? if ( ! empty($less)) foreach ($less as $item) { ?>
+<? if ( ! empty($css)) foreach ($css as $item) { ?>
     <link rel="stylesheet/css" type="text/css" href="<?=$item;?>" />
 <? } ?>
 
