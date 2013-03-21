@@ -92,11 +92,14 @@ class mvc
         // ничего не светить
         include_once ABS_CORE_PATH.'mvc_exception'.EXT;
         
-        // класс соединения с бд
-        include_once ABS_CORE_PATH.'db'.EXT;
-        
-        // попробуем подключиться
-        $this->DB = db::instance();
+		if ( ! NO_DB_USING)
+		{
+			// класс соединения с бд
+			include_once ABS_CORE_PATH.'db'.EXT;
+			
+			// попробуем подключиться
+			$this->DB = db::instance();
+		}
         
         spl_autoload_register(array('mvc', 'load_models'));
     }
