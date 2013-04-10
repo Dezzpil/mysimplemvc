@@ -15,7 +15,7 @@
 
 // Constants
 defined('HOST') || define('HOST', $_SERVER['HTTP_HOST']);
-defined('ABS_ROOT_PATH') || define('ABS_ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
+defined('ABS_ROOT_PATH') || define('ABS_ROOT_PATH', $_SERVER['DOCUMENT_ROOT'].'/');
 
 // Database
 defined('NO_DB_USING') || define('NO_DB_USING', false);
