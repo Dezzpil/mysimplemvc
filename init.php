@@ -61,6 +61,7 @@ include_once(ABS_CORE_PATH.'model/num.php');
 include_once(ABS_CORE_PATH.'model/session.php');
 include_once(ABS_CORE_PATH.'model/validator.php');
 include_once(ABS_CORE_PATH.'model/xhelp.php');
+include_once(ABS_CORE_PATH.'model/query_exception.php');
 
 mvc::set_default('controller_prefix', 'controller_');
 mvc::set_default('model_prefix', 'model_');

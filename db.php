@@ -19,7 +19,6 @@ class db
     }
     
     public $handle = FALSE;
-    
     function __construct()
     {
         $this->handle = mysql_connect(DB_HOST, DB_USER, DB_PASS);
@@ -32,25 +31,36 @@ class db
         mysql_select_db(DB_NAME, $this->handle);
     }
     
+    static public $last_query = null;
+    static public $last_error = null;
     function query($query)
     {
-        $res = mysql_query($query);
+        self::$last_query = $query;
         
-        // операции DML
-        if (is_bool($res)) 
-        {   
-            $id = mysql_insert_id();
-            return $id;
-        }
-
-        // опреации DDL
-        $result = array();
-        while ($r = mysql_fetch_assoc($res))
+        try 
         {
-            $result[] = $r;
-        }
+            $res = mysql_query($query);
 
-        return $result;
+            // операции DML
+            if (is_bool($res)) 
+            {   
+                return mysql_insert_id();
+            }
+
+            // опреации DDL
+            $result = array();
+            while ($r = mysql_fetch_assoc($res)) 
+            {
+                $result[] = $r;
+            }
+            
+            return $result;
+        } 
+        catch (Exception $e) 
+        {
+            self::$last_error = new query_exception(mysql_error(), mysql_errno());
+            throw self::$last_error;
+        }
     }
     
     function get_fields($tbl_name, $active_record = FALSE)
