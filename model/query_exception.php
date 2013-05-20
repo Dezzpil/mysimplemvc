@@ -1,4 +1,5 @@
 <?php
+namespace help;
 
 /*
  * To change this template, choose Tools | Templates
