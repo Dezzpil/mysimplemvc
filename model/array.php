@@ -1,4 +1,6 @@
 <?php
+namespace help;
+
 /**
  * Some common method for array
  * @author Dezzpil

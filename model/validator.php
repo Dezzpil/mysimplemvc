@@ -1,4 +1,5 @@
 <?php
+namespace help;
 
 /**
  * Validator
@@ -34,7 +35,7 @@ class validator
     
     function min_length($min_length)
     {
-        if (mb_strlen($this->value, 'Utf-8') < $min_length)
+        if (mb_strlen($this->value, BASE_CHARSET) < $min_length)
         {
             $this->errors[] = 'Длина текста должна быть больше '.$min_length;
         }
@@ -44,7 +45,7 @@ class validator
     
     function max_length($max_length)
     {
-        if (mb_strlen($this->value, 'Utf-8') > $max_length)
+        if (mb_strlen($this->value, BASE_CHARSET) > $max_length)
         {
             $this->errors[] = 'Длина текста должна быть меньше '.$max_length;
         }
@@ -54,7 +55,7 @@ class validator
     
     function latin_and_symbols($symbols)
     {
-        for ($i = 0; $i < mb_strlen($this->value, 'Utf-8'); $i++)
+        for ($i = 0; $i < mb_strlen($this->value, BASE_CHARSET); $i++)
         {
             $letter = $this->value[$i];
             
@@ -69,7 +70,7 @@ class validator
                 foreach ($alphabet_eng as $eng_letter)
                 {
                     // it's latin
-                    $letter = mb_strtolower($letter, 'Utf-8');
+                    $letter = mb_strtolower($letter, BASE_CHARSET);
                     if ($letter == $eng_letter) continue 2;
                 }
                 

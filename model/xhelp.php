@@ -1,9 +1,11 @@
 <?
+namespace help;
+
 /**
  * Tools
  * unsorted methods, that easy hard gray life
  */
-abstract class tools
+abstract class xhelp
 {
 	/**
 	 * Copy folder with it subfolders

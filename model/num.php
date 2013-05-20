@@ -1,4 +1,6 @@
 <?
+namespace help;
+
 /**
  * Translate int to string in current currency
  * @author Nikita Dezzpil Orlov

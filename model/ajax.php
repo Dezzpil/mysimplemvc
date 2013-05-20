@@ -1,4 +1,6 @@
 <?php
+namespace help;
+
 /**
  * Form ajax response
  * @author Nikita Dezzpil Orlov
