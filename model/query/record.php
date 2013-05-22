@@ -27,8 +27,8 @@ class query_record {
      * @return array \static
      */
     static function get_list(
-            sql\query_where $where = null, 
-            sql\query_order $order = null, 
+            query_where $where = null, 
+            query_order $order = null, 
             array $limit = array()
     ) {
         $query = "SELECT * FROM ".static::$tbl_name;
@@ -50,7 +50,7 @@ class query_record {
         
         #help\xhelp::pre($query);die;
         
-        $result = db::instance()->query($query);
+        $result = \db::instance()->query($query);
         $objects = array();
         foreach ($result as $row) {
             $objects[$row['id']] = new static();
@@ -74,7 +74,7 @@ class query_record {
     
     protected function load($id) {
         $query = "select * from ".static::$tbl_name." where id=$id";
-        $props = db::instance()->query($query);
+        $props = \db::instance()->query($query);
         
         foreach ($props[0] as $name => $val) {
             $this->$name = $val;
@@ -130,7 +130,7 @@ class query_record {
         $query = substr($query, 0, strlen($query) - 2);
         $query .= " WHERE id=".$this->id;
 
-        return db::instance()->query($query);
+        return \db::instance()->query($query);
     }
     
     protected function insert() {
@@ -145,7 +145,7 @@ class query_record {
         $query = substr($query, 0, strlen($query) - 2);
         $query .= ")";
         
-        return db::instance()->query($query);
+        return \db::instance()->query($query);
     }
 }
 
