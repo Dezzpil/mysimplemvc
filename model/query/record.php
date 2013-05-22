@@ -48,15 +48,13 @@ class query_record {
                 $query .= ' LIMIT '.$limit[0].','.$limit[1]; break;
         }
         
-        #help\xhelp::pre($query);die;
-        
         $result = \db::instance()->query($query);
         $objects = array();
         foreach ($result as $row) {
             $objects[$row['id']] = new static();
             foreach ($row as $key => $val) {
                 if (NEED_TO_CONVERT_UTF8) {
-                    $objects[$row['id']]->$key = help\xhelp::win1251_to_utf8($val);
+                    $objects[$row['id']]->$key = \help\xhelp::win1251_to_utf8($val);
                 } else {
                     $objects[$row['id']]->$key = $val;
                 }
@@ -111,7 +109,7 @@ class query_record {
                 $this->id = $this->insert();
             }
         } 
-        catch (help\query_exception $e) {
+        catch (query_exception $e) {
             die($e->GetCode().' '.$e->GetMessage());
         }
     }
