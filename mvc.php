@@ -1,4 +1,6 @@
 <?php
+use \core;
+
 /**
  * Description of mvc
  *
@@ -88,6 +90,11 @@ class mvc
     
     function __construct()
     {
+        // классы для работы с представлением
+        include_once ABS_CORE_PATH.'view'.EXT;
+        include_once ABS_CORE_PATH.'include_view'.EXT;
+        include_once ABS_CORE_PATH.'asset'.EXT;
+        
         // подключим свой класс для обработки ошибок, чтобы
         // ничего не светить
         include_once ABS_CORE_PATH.'mvc_exception'.EXT;
@@ -175,54 +182,13 @@ class mvc
     
     function render()
     {
-        $view = view::$view_name;
-        $view = trim($view);
-        if ( ! $view) throw new mvc_exception('use view::set_view($name, $data) for setup view in controller');
-        
-        $view_data = view::$view_data;
-        if (is_array($view_data))
-        {
-            foreach ($view_data as $key => $val)
-            {
-                // создаем переменные из ключей массива
-                $$key = $val; 
-            }
-        }
-        
-        // подключаем вид
-        ob_start();
-        include ABS_ZONE_PATH.$view.EXT;
-        
-        // создаем переменную, в которую записываем рендер всего представления
-        // эта переменная вставляется в шаблон
-        $content = ob_get_clean();
-        
-        $template = view::$template_name;
-        $template = trim($template);
-        if ( ! $template) throw new mvc_exception('use view::set_template($name, $data) for setup template in controller');
-        
-        $template_data = view::$template_data;
-        if (is_array($template_data))
-        {
-            foreach ($template_data as $key => $val)
-            {
-                // создаем переменные из ключей массива
-                $$key = $val; 
-            }
-        }
-        
-        // подключаем шаблон
-        ob_start();
-        include ABS_TEMPLATE_PATH.$template.EXT;
-        $template = ob_get_clean();
-        
-        echo $template;
+        echo view::render();
+        die;
     }
     
     function exec_controller($file_name, $action_name, $params)
     {
         include_once ABS_CORE_PATH.'controller'.EXT;
-        include_once ABS_CORE_PATH.'view'.EXT;
         
         // подключаем файл с искомым контроллером
         spl_autoload_register(array('mvc', 'load_controllers'));

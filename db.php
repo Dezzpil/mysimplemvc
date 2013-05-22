@@ -1,5 +1,8 @@
 <?php
 
+use \sql;
+use \help;
+
 /**
  * Common MYSQL base connector
  * @author Nikita Dezzpil Orlov
@@ -29,6 +32,8 @@ class db
         }
         
         mysql_select_db(DB_NAME, $this->handle);
+        mysql_query('SET NAMES UTF-8');
+
     }
     
     static public $last_query = null;
@@ -61,6 +66,10 @@ class db
             self::$last_error = new query_exception(mysql_error(), mysql_errno());
             throw self::$last_error;
         }
+    }
+    
+    static function prepare_string($string) {
+        return mysql_real_escape_string($string);
     }
     
     function get_fields($tbl_name, $active_record = FALSE)

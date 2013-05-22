@@ -1,5 +1,5 @@
 <?php
-namespace help;
+namespace sql;
 
 /*
  * To change this template, choose Tools | Templates
@@ -11,7 +11,7 @@ namespace help;
  *
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
  */
-class query_exception extends Exception {
+class query_exception extends \Exception {
     
     public function __construct($message, $code, $previous) {
         parent::__construct($message, $code, $previous);
