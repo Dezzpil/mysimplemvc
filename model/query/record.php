@@ -103,7 +103,11 @@ class query_record {
                 $value = help\xhelp::utf8_to_win1251($value);
             }
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> new_branch_name
         $this->loaded_vals[$key] = $value;
         return $this;
     }
@@ -112,13 +116,21 @@ class query_record {
         return @$this->loaded_vals[$key];
     }
     
+<<<<<<< HEAD
     /**
+=======
+     /**
+>>>>>>> new_branch_name
      * 
      * @return int
      * @throws \Exception
      */
     function get_id() {
+<<<<<<< HEAD
         if ($this->id) {
+=======
+        if ($this->id !== null) {
+>>>>>>> new_branch_name
             return $this->id;
         }
         
