@@ -16,6 +16,11 @@ class query_order {
     const ASC = 'ASC';
     const DESC = 'DESC';
     
+    static function forge($key, $order) {
+        return new self($key, $order);
+    }
+    
+    
     protected $orders = array();
     
     public function __construct($key, $order) {

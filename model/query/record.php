@@ -1,5 +1,6 @@
 <?php
 namespace sql;
+use help;
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -18,6 +19,13 @@ class query_record {
     protected $changed_vals = array();
     protected $loaded_vals = array();
     protected $id = null;
+    
+    static function remove($key, $cmp_opertor, $val) {
+        $query = "DELETE FROM ".static::$tbl_name." where `{$key}`".$cmp_opertor.\db::prepare_string($val);
+        $result = \db::instance()->query($query);
+        
+        return $result;
+    }
     
     /**
      * Возвращает массив объектов
@@ -89,6 +97,13 @@ class query_record {
     
     function set($key, $value) {
         $this->changed_vals[$key] = @$this->loaded_vals[$key];
+        
+        if (NEED_TO_CONVERT_UTF8) {
+            if (is_string($value)) {
+                $value = help\xhelp::utf8_to_win1251($value);
+            }
+        }
+        
         $this->loaded_vals[$key] = $value;
         return $this;
     }
@@ -97,8 +112,17 @@ class query_record {
         return @$this->loaded_vals[$key];
     }
     
+     /**
+     * 
+     * @return int
+     * @throws \Exception
+     */
     function get_id() {
-        return $this->id;
+        if ($this->id) {
+            return $this->id;
+        }
+        
+        throw new \Exception('Id для объекта сущности '.static::$tbl_name.' неопределен');
     }
 
     function save() {
@@ -115,14 +139,16 @@ class query_record {
     }
     
     protected function update() {
+        
         $query = "UPDATE ".static::$tbl_name." SET ";
         foreach ($this->changed_vals as $prop => $value) {
             $query .= $prop."=";
-            if (is_string($value)) $query .= "'".$this->loaded_vals[$prop];
-            else if (is_int($value)) $query .= $this->loaded_vals[$prop];
-            else if (is_float($value)) $query .= $this->loaded_vals[$prop];
-            else die('Нельзя записать значение в базу');
-            $query .= "', ";
+            $value = \db::prepare_string($this->loaded_vals[$prop]);
+            if (is_string($value)) $query .= "'".$value."'";
+            elseif (is_int($value)) $query .= $value;
+            elseif (is_float($value)) $query .= $value;
+            else $query .= "'".$value."'";
+            $query .= ", ";
         }
 
         $query = substr($query, 0, strlen($query) - 2);
@@ -134,16 +160,19 @@ class query_record {
     protected function insert() {
         $query = "INSERT INTO ".static::$tbl_name." (".join(",", array_keys($this->loaded_vals)).") VALUES (";
         foreach ($this->loaded_vals as $value) {
+            $value = \db::prepare_string($value);
             if (is_string($value)) $query .= "'".$value."'";
-            else if (is_int($value)) $query .= $value;
-            else if (is_float($value)) $query .= $value;
-            else die('Нельзя записать значение в базу');
+            elseif (is_int($value)) $query .= $value;
+            elseif (is_float($value)) $query .= $value;
+            else $query .= "'".$value."'";
             $query .= ", ";
         }
         $query = substr($query, 0, strlen($query) - 2);
         $query .= ")";
         
-        return \db::instance()->query($query);
+        $result = \db::instance()->query($query);
+        
+        return $result;
     }
 }
 
