@@ -118,7 +118,7 @@ class query_record {
      * @throws \Exception
      */
     function get_id() {
-        if ($this->id) {
+        if ($this->id !== null) {
             return $this->id;
         }
         
