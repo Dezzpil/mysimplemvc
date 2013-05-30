@@ -13,6 +13,14 @@ namespace core;
 class asset {
     //put your code here
     
+    /**
+     * 
+     * @return \self
+     */
+    static function forge() {
+        return new self;
+    }
+    
     public $js_array = array();
     function add_js($js_link)
     {

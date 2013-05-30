@@ -17,6 +17,10 @@ class query_order {
     const DESC = 'DESC';
     
     protected $orders = array();
+
+    static function forge($key, $order) {
+        return new self($key, $order);
+    }
     
     public function __construct($key, $order) {
         $this->orders[] = array($key, $order);
