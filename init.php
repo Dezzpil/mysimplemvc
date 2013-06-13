@@ -14,6 +14,7 @@
 @include("../config/config.php");
 
 // Constants
+defined('BASE_CHARSET') || define('BASE_CHARSET', 'utf-8');
 defined('HOST') || define('HOST', $_SERVER['HTTP_HOST']);
 defined('ABS_ROOT_PATH') || define('ABS_ROOT_PATH', $_SERVER['DOCUMENT_ROOT'].'/');
 

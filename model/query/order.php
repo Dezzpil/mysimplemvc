@@ -20,12 +20,7 @@ class query_order {
         return new self($key, $order);
     }
     
-    
     protected $orders = array();
-
-    static function forge($key, $order) {
-        return new self($key, $order);
-    }
     
     public function __construct($key, $order) {
         $this->orders[] = array($key, $order);
