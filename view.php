@@ -39,8 +39,9 @@ class view
                 
                 // преобразуем core\include_view в массив
                 $tmp = self::$include_views[$var_name];
-                self::$include_views[$var_name] = array();
-                self::$include_views[$var_name][] = $tmp;
+                self::$include_views[$var_name] = array($tmp);
+                self::$include_views[$var_name][] = $view;
+                
                 
             } else {
                 

@@ -126,6 +126,8 @@ class mvc
         
         try 
         {
+            
+            
             $this->exec_controller($file_name, $action_name, $params);
             $this->render();
         }
