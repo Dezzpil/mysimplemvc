@@ -1,6 +1,5 @@
 <?php
-namespace sql;
-use help;
+namespace help;
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -11,7 +10,7 @@ use help;
  *
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
  */
-class query_record {
+class record {
     //put your code here
     
     static protected $tbl_name = null;
@@ -32,6 +31,7 @@ class query_record {
      * @param sql\query_where $where
      * @param sql\query_order $order
      * @param array $limit [0, 100] || [20]
+     * @throws query_exception
      * @return array \static
      */
     static function get_list(
@@ -57,12 +57,13 @@ class query_record {
         }
         
         $result = \db::instance()->query($query);
+        
         $objects = array();
         foreach ($result as $row) {
             $objects[$row['id']] = new static();
             foreach ($row as $key => $val) {
                 if (NEED_TO_CONVERT_UTF8) {
-                    $objects[$row['id']]->$key = \help\xhelp::win1251_to_utf8($val);
+                    $objects[$row['id']]->$key = xhelp::win1251_to_utf8($val);
                 } else {
                     $objects[$row['id']]->$key = $val;
                 }
@@ -72,16 +73,29 @@ class query_record {
         return $objects;
     }
     
+    static function add() {
+        return new self();
+    }
+    
+    /**
+     * @throws query_exception
+     * @param type $id
+     */
     public function __construct($id = null) {    
         if (intval($id)) { 
             $this->load($id);     
         }
     }
     
+    /**
+     * 
+     * @param type $id
+     * @throws query_exception
+     */
     protected function load($id) {
         $query = "select * from ".static::$tbl_name." where id=$id";
         $props = \db::instance()->query($query);
-        
+
         foreach ($props[0] as $name => $val) {
             $this->$name = $val;
         }
@@ -100,7 +114,7 @@ class query_record {
         
         if (NEED_TO_CONVERT_UTF8) {
             if (is_string($value)) {
-                $value = help\xhelp::utf8_to_win1251($value);
+                $value = xhelp::utf8_to_win1251($value);
             }
         }
         
@@ -115,7 +129,7 @@ class query_record {
      /**
      * 
      * @return int
-     * @throws \Exception
+     * @throws \record_exception
      */
     function get_id() {
 
@@ -123,20 +137,21 @@ class query_record {
             return $this->id;
         }
         
-        throw new \Exception('Id для объекта сущности '.static::$tbl_name.' неопределен');
+        throw new \record_exception('Id для объекта сущности '.static::$tbl_name.' неопределен');
     }
 
+    /**
+     * 
+     * @throws query_exception
+     */
     function save() {
-        try {
-            if (intval($this->id) > 0) {
-                $this->update();
-            } else {
-                $this->id = $this->insert();
-            }
-        } 
-        catch (query_exception $e) {
-            die($e->GetCode().' '.$e->GetMessage());
+        if (intval($this->id) > 0) {
+            $this->update();
+        } else {
+            $this->id = $this->insert();
         }
+        
+        return $this;
     }
     
     protected function update() {

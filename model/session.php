@@ -43,5 +43,13 @@ class session
             unset($_SESSION[$key]);
         }
     }
+    
+    static function start() {
+        session_start();
+    }
+    
+    static function close() {
+        session_write_close();
+    }
 }
 ?>

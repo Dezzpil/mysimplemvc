@@ -116,7 +116,7 @@ class view
     static function render() {
         
         $view = trim(self::$view_name);
-        if ( ! $view) throw new mvc_exception('use view::set_view($name, $data) for setup view in controller');
+        if ( ! $view) throw new mvc_exception('use view::set_view($name) for setup view in controller');
         
         // рендерим вложенные представления
         $data = self::$view_data;
@@ -129,7 +129,7 @@ class view
 
         // рендерим шаблон
         $template = trim(self::$template_name);
-        if ( ! $template) throw new mvc_exception('use view::set_template($name, $data) for setup template in controller');
+        if ( ! $template) throw new mvc_exception('use view::set_template($name) for setup template in controller');
         
         foreach (self::$template_data as $key => $val)
         {

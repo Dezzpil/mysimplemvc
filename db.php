@@ -28,7 +28,7 @@ class db
         
         if ($this->handle === FALSE)
         {
-            throw new mvc_exception('Невозможно подключиться к базе. Забей :)');
+            throw new db_exception('Невозможно подключиться к базе');
         }
         
         mysql_select_db(DB_NAME, $this->handle);
@@ -74,20 +74,26 @@ class db
     
     function get_fields($tbl_name, $active_record = FALSE)
     {
-        $tbl_name = mysql_real_escape_string($tbl_name);
-        $query = "SHOW COLUMNS FROM $tbl_name";
-        
-        $result = $this->query($query);
-        
-        if ($active_record)
+        try 
         {
-            foreach ($result as & $field)
+            $tbl_name = mysql_real_escape_string($tbl_name);
+            $query = "SHOW COLUMNS FROM $tbl_name";
+
+            $result = $this->query($query);
+
+            if ($active_record)
             {
-                if ($field['Key'] == 'PRI' && $field['Extra'] == 'auto_increment')
+                foreach ($result as & $field)
                 {
-                    unset($field);
+                    if ($field['Key'] == 'PRI' && $field['Extra'] == 'auto_increment')
+                    {
+                        unset($field);
+                    }
                 }
             }
+        } catch (Exception $e) {
+            self::$last_error = new query_exception(mysql_error(), mysql_errno());
+            throw self::$last_error;
         }
         
         return $result;

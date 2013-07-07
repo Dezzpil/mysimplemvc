@@ -8,7 +8,11 @@ namespace sql;
  */
 class query_where
 {
-    public function __construct($condition = null) {
+    static function create($condition = null) {
+        return new self($condition);
+    }
+    
+    public function __construct($condition) {
         if ($condition !== null) {
             $this->where = $condition;
         }

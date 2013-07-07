@@ -103,6 +103,7 @@ class mvc
 		{
 			// класс соединения с бд
 			include_once ABS_CORE_PATH.'db'.EXT;
+            include_once ABS_CORE_PATH.'db_exception'.EXT;
 			
 			// попробуем подключиться
 			$this->DB = db::instance();
