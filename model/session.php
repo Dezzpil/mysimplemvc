@@ -13,10 +13,20 @@ class session
     {
         if (self::$instance === null)
         {
+            self::start();
             self::$instance = new self;
         }
         
         return self::$instance;
+    }
+    
+        
+    static function start() {
+        session_start();
+    }
+    
+    static function close() {
+        session_write_close();
     }
     
     private function __construct()
@@ -42,14 +52,6 @@ class session
         {
             unset($_SESSION[$key]);
         }
-    }
-    
-    static function start() {
-        session_start();
-    }
-    
-    static function close() {
-        session_write_close();
     }
 }
 ?>

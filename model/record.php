@@ -1,5 +1,7 @@
 <?php
 namespace help;
+use \sql\query_where;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -57,7 +59,7 @@ class record {
         }
         
         $result = \db::instance()->query($query);
-        
+
         $objects = array();
         foreach ($result as $row) {
             $objects[$row['id']] = new static();
