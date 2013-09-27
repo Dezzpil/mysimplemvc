@@ -28,6 +28,11 @@ class view
         self::$view_data = $data;
     }
     
+    static function set_data($data) 
+    {
+         self::$view_data = $data;
+    }
+    
     static function set_asset(core\asset $asset) {
         self::$asset = $asset;
     }
