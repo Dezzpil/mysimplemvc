@@ -81,8 +81,7 @@ class mvc
     
     static function redirect($request)
     {
-        header("Location: ".ROOT_PATH.$request);
-        die('redirect');
+        self::instance()->request($request);
     }
     
     private $controller;
