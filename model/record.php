@@ -1,5 +1,7 @@
 <?php
 namespace help;
+use \sql\query_where;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -57,7 +59,7 @@ class record {
         }
         
         $result = \db::instance()->query($query);
-        
+
         $objects = array();
         foreach ($result as $row) {
             $objects[$row['id']] = new static();
@@ -83,7 +85,7 @@ class record {
      */
     public function __construct($id = null) {    
         if (intval($id)) { 
-            $this->load($id);     
+            $this->load($id);  
         }
     }
     
@@ -174,7 +176,7 @@ class record {
     }
     
     protected function insert() {
-        $query = "INSERT INTO ".static::$tbl_name." (".join(",", array_keys($this->loaded_vals)).") VALUES (";
+        $query = "insert into ".static::$tbl_name." (".join(",", array_keys($this->loaded_vals)).") values (";
         foreach ($this->loaded_vals as $value) {
             $value = \db::prepare_string($value);
             if (is_string($value)) $query .= "'".$value."'";

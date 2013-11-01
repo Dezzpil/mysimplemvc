@@ -1,5 +1,5 @@
 <?php
-
+namespace help;
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -10,7 +10,7 @@
  *
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
  */
-class record_exception extends Exception {
+class record_exception extends \Exception {
     //put your code here
 }
 
