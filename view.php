@@ -118,8 +118,12 @@ class view
         $view = trim(self::$view_name);
         if ( ! $view) throw new mvc_exception('use view::set_view($name) for setup view in controller');
         
-        // рендерим вложенные представления
-        $data = self::$view_data;
+        if (self::$view_data) {
+            $data = self::$view_data;
+        } else {
+            $data = array();
+        }
+        
         foreach (self::$include_views as $var_name => $include_view) {
             $data[$var_name] = self::render_included($include_view);
         }
