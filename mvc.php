@@ -18,10 +18,11 @@ class mvc
     
     static private $_instance;
  
-    static public function instance()
-    {
+    static public function instance() {
         if ( ! isset(self::$_instance))
         {
+            spl_autoload_register(array('mvc', 'load_controllers'));
+            spl_autoload_register(array('mvc', 'load_models'));
             self::$_instance = new self;
         }
         return self::$_instance;
@@ -78,10 +79,31 @@ class mvc
         $path = ABS_CONTROLLER_PATH.$name[1].EXT;
         include_once $path;
     }
-    
-    static function redirect($request)
-    {
+
+    /**
+     * @param $request
+     * @deprecated
+     */
+    static function redirect($request) {
         self::instance()->request($request);
+    }
+
+    /**
+     * @param string $controllerFile (without prefix)
+     * @param string $actionName
+     * @param array $params
+     * @throws mvc_exception
+     */
+    static function redirectController($controllerFile, $actionName, $params = array()) {
+        self::instance()->requestMVC($controllerFile, $actionName, $params);
+    }
+
+    /**
+     * @param string $request
+     */
+    static function redirectHeader($request){
+        header($request);
+        die;
     }
     
     private $controller;
@@ -97,7 +119,10 @@ class mvc
         // подключим свой класс для обработки ошибок, чтобы
         // ничего не светить
         include_once ABS_CORE_PATH.'mvc_exception'.EXT;
-        
+
+        // root controller
+        include_once ABS_CORE_PATH.'controller'.EXT;
+
 		if ( ! NO_DB_USING)
 		{
 			// класс соединения с бд
@@ -107,35 +132,36 @@ class mvc
 			// попробуем подключиться
 			$this->DB = db::instance();
 		}
-        
-        spl_autoload_register(array('mvc', 'load_models'));
     }
-    
-    function request($request)
-    {
+
+    /**
+     * @param string $request
+     * @throws mvc_exception
+     */
+    function request($request) {
         $mvc_request = $this->parse_request_uri($request);
-        
-        $file_name = $mvc_request[0];
-        $action_name = $mvc_request[1];
+
+        $controllerFile = $mvc_request[0];
+        $actionName = $mvc_request[1];
         $params = $mvc_request[2];
-        
-        if (count($mvc_request) == 3)
-        {
-            //$params = $this->parse_get_params($mvc_request[2]);
-        }
-        
-        try 
-        {
-            
-            
-            $this->exec_controller($file_name, $action_name, $params);
+
+        $this->requestMVC($controllerFile, $actionName, $params);
+    }
+
+
+    /**
+     * @param string $controllerFile
+     * @param string $actionName
+     * @param array $params
+     * @throws mvc_exception
+     */
+    function requestMVC($controllerFile, $actionName, $params = array()) {
+        try {
+            $this->exec_controller($controllerFile, $actionName, $params);
             $this->render();
-        }
-        catch (mvc_exception $e)
-        {
+        } catch (mvc_exception $e) {
             throw new mvc_exception($e->message);
         }
-        
     }
     
     /**
@@ -143,8 +169,7 @@ class mvc
      * @param string $request
      * @return array 
      */
-    function parse_request_uri($request)
-    {
+    function parse_request_uri($request) {
         $tmp_ar_request = explode('/', $request);
         
         // отсеим пустые значения после explode
@@ -182,18 +207,14 @@ class mvc
         return $ar_request;
     }
     
-    function render()
-    {
+    function render() {
         echo view::render();
         die;
     }
     
     function exec_controller($file_name, $action_name, $params)
     {
-        include_once ABS_CORE_PATH.'controller'.EXT;
-        
         // подключаем файл с искомым контроллером
-        spl_autoload_register(array('mvc', 'load_controllers'));
         $class_name = self::$_default['controller_prefix'].$file_name;
         
         // Выполнение

@@ -16,20 +16,17 @@ class view
     static protected $asset = null;
     static protected $include_views = array();
     
-    static function set_template($name, $data = array())
-    {
+    static function set_template($name, $data = array()) {
         self::$template_name = $name;
         self::$template_data = $data;
     }
     
-    static function set_view($name, $data = array())
-    {
+    static function set_view($name, $data = array()) {
         self::$view_name = $name;
-        self::$view_data = $data;
+        if (!empty($data)) self::$view_data = $data;
     }
     
-    static function set_data($data) 
-    {
+    static function set_data($data) {
          self::$view_data = $data;
     }
     
@@ -38,9 +35,8 @@ class view
     }
     
     static function include_view($var_name, core\include_view $view) {
-        if (array_key_exists($var_name, self::$include_views) !== false)
-        {
-            if (!is_array(self::$include_views[$var_name])) {
+        if (array_key_exists($var_name, self::$include_views) !== false) {
+            if ( ! is_array(self::$include_views[$var_name])) {
                 
                 // преобразуем core\include_view в массив
                 $tmp = self::$include_views[$var_name];
@@ -53,9 +49,7 @@ class view
                 self::$include_views[$var_name][] = $view;
                 
             }
-        }
-        else
-        {
+        } else {
             self::$include_views[$var_name] = $view;
         }
     }
