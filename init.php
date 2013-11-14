@@ -11,7 +11,7 @@
 /**
  * you may create your own config
  */
-@include("../config/config.php");
+include("../config/config.php");
 
 // Constants
 defined('BASE_CHARSET') || define('BASE_CHARSET', 'utf-8');

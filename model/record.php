@@ -139,7 +139,7 @@ class record {
             return $this->id;
         }
         
-        throw new \record_exception('Id для объекта сущности '.static::$tbl_name.' неопределен');
+        throw new record_exception('Id для объекта сущности '.static::$tbl_name.' неопределен');
     }
 
     /**
