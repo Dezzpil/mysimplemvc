@@ -15,6 +15,11 @@ use \sql\query_where;
 class record {
     //put your code here
     
+    const COL_TYPE_INT = 'int';
+    const COL_TYPE_STRING = 'string';
+    
+    static protected $unicKey = 'id';
+    static protected $unicType = self::COL_TYPE_INT;
     static protected $tbl_name = null;
     
     protected $changed_vals = array();
@@ -34,12 +39,14 @@ class record {
      * @param sql\query_order $order
      * @param array $limit [0, 100] || [20]
      * @throws query_exception
+     * @deprecated
      * @return array \static
      */
     static function get_list(
             query_where $where = null, 
             query_order $order = null, 
-            array $limit = array()
+            $limit = array(),
+            $asArray = false
     ) {
         $query = "SELECT * FROM ".static::$tbl_name;
         
@@ -51,25 +58,32 @@ class record {
             $query .= $order->get_prepared();
         }
         
-        switch (count($limit)) {
-            case 1 : 
-                $query .= ' LIMIT '.$limit[0]; break;
-            case 2 :
-                $query .= ' LIMIT '.$limit[0].','.$limit[1]; break;
+        if ($limit) {
+            switch (count($limit)) {
+                case 1 : 
+                    $query .= ' LIMIT '.$limit[0]; break;
+                case 2 :
+                    $query .= ' LIMIT '.$limit[0].','.$limit[1]; break;
+            }
         }
         
         $result = \db::instance()->query($query);
 
         $objects = array();
         foreach ($result as $row) {
-            $objects[$row['id']] = new static();
+            
+            $obj = new static();
+            
             foreach ($row as $key => $val) {
                 if (NEED_TO_CONVERT_UTF8) {
-                    $objects[$row['id']]->$key = xhelp::win1251_to_utf8($val);
+                    $obj->$key = xhelp::win1251_to_utf8($val);
                 } else {
-                    $objects[$row['id']]->$key = $val;
+                    $obj->$key = $val;
                 }
             }
+           
+            if ($asArray) $objects[$row[static::$unicKey]] = $obj->toArray();
+            else $objects[$row[static::$unicKey]] = $obj;
         }
         
         return $objects;
@@ -85,7 +99,7 @@ class record {
      */
     public function __construct($id = null) {    
         if ($id !== null) { 
-            $this->load($id);  
+            $this->load($id);
         }
     }
     
@@ -95,8 +109,8 @@ class record {
      * @throws query_exception
      */
     protected function load($id) {
-        if (is_string($id)) $id = '"'.$id.'"';
-        $query = "select * from ".static::$tbl_name." where id=$id";
+        if (self::$unicType == 'string') $id = '"'.$id.'"';
+        $query = "select * from ".static::$tbl_name." where ".static::$unicKey."=$id";
         $props = \db::instance()->query($query);
 
         foreach ($props[0] as $name => $val) {
@@ -135,12 +149,14 @@ class record {
      * @throws \record_exception
      */
     function get_id() {
-
-        if ($this->id !== null) {
-            return $this->id;
+        
+        $idKey = static::$unicKey;
+        
+        if ($this->$idKey !== null) {
+            return $this->$idKey;
         }
         
-        throw new record_exception('Id для объекта сущности '.static::$tbl_name.' неопределен');
+        throw new record_exception('Id ('.$idKey.') для объекта сущности '.static::$tbl_name.' неопределен');
     }
 
     /**
@@ -148,17 +164,18 @@ class record {
      * @throws query_exception
      */
     function save() {
-        if (intval($this->id) > 0) {
+        $idKey = static::$unicKey;
+        if (intval($this->$idKey) > 0) {
             $this->update();
         } else {
-            $this->id = $this->insert();
+            $this->$idKey = $this->insert();
         }
         
         return $this;
     }
     
     protected function update() {
-        
+        $idKey = static::$unicKey;
         $query = "UPDATE ".static::$tbl_name." SET ";
         foreach ($this->changed_vals as $prop => $value) {
             $query .= $prop."=";
@@ -171,7 +188,7 @@ class record {
         }
 
         $query = substr($query, 0, strlen($query) - 2);
-        $query .= " WHERE id=".$this->id;
+        $query .= " WHERE ".$idKey."=".$this->$idKey;
 
         return \db::instance()->query($query);
     }
@@ -193,6 +210,17 @@ class record {
         
         return $result;
     }
+    
+    public function toArray() {
+        $array = array();
+        foreach ($this->loaded_vals as $key => $val) {
+            if (is_object($val)) $val = $val->toArray();
+            $array[$key] = $val;
+        }
+        
+        return $array;
+    }
+    
 }
 
 ?>
