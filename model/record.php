@@ -84,7 +84,7 @@ class record {
      * @param type $id
      */
     public function __construct($id = null) {    
-        if (intval($id)) { 
+        if ($id !== null) { 
             $this->load($id);  
         }
     }
@@ -95,6 +95,7 @@ class record {
      * @throws query_exception
      */
     protected function load($id) {
+        if (is_string($id)) $id = '"'.$id.'"';
         $query = "select * from ".static::$tbl_name." where id=$id";
         $props = \db::instance()->query($query);
 
