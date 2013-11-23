@@ -208,7 +208,7 @@ class mvc
     }
     
     function render() {
-        echo view::render();
+        echo view::complete();
         die;
     }
     

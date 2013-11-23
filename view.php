@@ -114,7 +114,6 @@ class view
     }
     
     static function render() {
-        
         $view = trim(self::$view_name);
         if ( ! $view) throw new mvc_exception('use view::set_view($name) for setup view in controller');
         
@@ -130,6 +129,13 @@ class view
         
         // рендерим главное представление
         $content = self::put_view_file($view, $data, self::$asset);
+        return $content;
+    }
+    
+    static function complete() {
+
+        // рендерим главное представление
+        $content = self::render();
 
         // рендерим шаблон
         $template = trim(self::$template_name);

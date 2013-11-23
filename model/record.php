@@ -36,12 +36,12 @@ class record {
     
     /**
      * Возвращает массив объектов
-     * @param sql\query_where $where
-     * @param sql\query_order $order
-     * @param array $limit [0, 100] || [20]
+     * @param \sql\query_where $where
+     * @param \sql\query_order $order
+     * @param type $limit
+     * @param type $asArray
      * @throws query_exception
-     * @deprecated
-     * @return array \static
+     * @return \static
      */
     static function get_list(
             query_where $where = null, 
@@ -100,8 +100,6 @@ class record {
      */
     public function __construct($id = null) {
         
-        var_dump(static::$tbl_name);
-        
         if ($id !== null) { 
             $this->load($id);
         }
@@ -115,7 +113,6 @@ class record {
     protected function load($id) {
         if (self::$unicType == 'string') $id = '"'.$id.'"';
         $query = "select * from ".static::$tbl_name." where ".static::$unicKey."=$id";
-        var_dump($query);
         $props = \db::instance()->query($query);
 
         foreach ($props[0] as $name => $val) {
@@ -194,9 +191,6 @@ class record {
 
         $query = substr($query, 0, strlen($query) - 2);
         $query .= " WHERE ".$idKey."=".$this->$idKey;
-        
-        var_dump($query);
-
         return \db::instance()->query($query);
     }
     
@@ -213,11 +207,8 @@ class record {
         $query = substr($query, 0, strlen($query) - 2);
         $query .= ")";
         
-        var_dump(static::$tbl_name);
-        echo $query;
-        
         $result = \db::instance()->query($query);
-        
+        var_dump($query);
         return $result;
     }
     
