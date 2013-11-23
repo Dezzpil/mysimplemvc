@@ -1,6 +1,7 @@
 <?php
 namespace help;
 use \sql\query_where;
+use \sql\query_order;
 
 /*
  * To change this template, choose Tools | Templates
@@ -20,7 +21,7 @@ class record {
     
     static protected $unicKey = 'id';
     static protected $unicType = self::COL_TYPE_INT;
-    static protected $tbl_name = null;
+    static protected $tbl_name;
     
     protected $changed_vals = array();
     protected $loaded_vals = array();
@@ -90,14 +91,17 @@ class record {
     }
     
     static function add() {
-        return new self();
+        return new static();
     }
-    
+
     /**
      * @throws query_exception
      * @param type $id
      */
-    public function __construct($id = null) {    
+    public function __construct($id = null) {
+        
+        var_dump(static::$tbl_name);
+        
         if ($id !== null) { 
             $this->load($id);
         }
@@ -111,6 +115,7 @@ class record {
     protected function load($id) {
         if (self::$unicType == 'string') $id = '"'.$id.'"';
         $query = "select * from ".static::$tbl_name." where ".static::$unicKey."=$id";
+        var_dump($query);
         $props = \db::instance()->query($query);
 
         foreach ($props[0] as $name => $val) {
@@ -189,6 +194,8 @@ class record {
 
         $query = substr($query, 0, strlen($query) - 2);
         $query .= " WHERE ".$idKey."=".$this->$idKey;
+        
+        var_dump($query);
 
         return \db::instance()->query($query);
     }
@@ -205,6 +212,9 @@ class record {
         }
         $query = substr($query, 0, strlen($query) - 2);
         $query .= ")";
+        
+        var_dump(static::$tbl_name);
+        echo $query;
         
         $result = \db::instance()->query($query);
         
