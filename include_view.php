@@ -16,6 +16,10 @@ class include_view {
     protected $name;
     protected $data;
     
+    static public function forge($name, $data) {
+        return new self($name, $data);
+    }
+    
     public function __construct($name, $data) {
         $this->name = $name;
         $this->data = $data;

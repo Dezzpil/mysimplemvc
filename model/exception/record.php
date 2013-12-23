@@ -6,7 +6,7 @@ namespace help;
  */
 
 /**
- * Description of record_exception
+ * Description of record
  *
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
  */

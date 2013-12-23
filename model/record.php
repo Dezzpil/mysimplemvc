@@ -95,8 +95,9 @@ class record {
     }
 
     /**
-     * @throws query_exception
      * @param type $id
+     * @throws query_exception
+     * @throws norecord_exception
      */
     public function __construct($id = null) {
         
@@ -109,14 +110,19 @@ class record {
      * 
      * @param type $id
      * @throws query_exception
+     * @throws norecord_exception
      */
     protected function load($id) {
-        if (self::$unicType == 'string') $id = '"'.$id.'"';
-        $query = "select * from ".static::$tbl_name." where ".static::$unicKey."=$id";
+        if (static::$unicType == 'string') $id = '"'.$id.'"';
+        $query = 'select * from '.static::$tbl_name.' where '.static::$unicKey.'='.$id;
         $props = \db::instance()->query($query);
-
-        foreach ($props[0] as $name => $val) {
-            $this->$name = $val;
+        
+        if (! empty($props)) {
+            foreach ($props[0] as $name => $val) {
+                $this->$name = $val;
+            }
+        } else {
+            throw new norecord_exception('No object with given id');
         }
     }
     
@@ -208,7 +214,6 @@ class record {
         $query .= ")";
         
         $result = \db::instance()->query($query);
-        var_dump($query);
         return $result;
     }
     
