@@ -1,5 +1,5 @@
 <?php
-namespace help;
+namespace msmvc\help;
 
 /**
  * Validator
@@ -22,15 +22,13 @@ class validator
      * Get errors array (simple array)
      * @return array
      */
-    function get_errors()
-    {
+    function get_errors() {
         return $this->errors;
     }
 
     protected $value;
     
-    function __construct($value)
-    {
+    function __construct($value) {
         $this->value = $value;
     }
     
@@ -42,20 +40,16 @@ class validator
         return $this;
     }
     
-    function min_length($min_length)
-    {
-        if (mb_strlen($this->value, BASE_CHARSET) < $min_length)
-        {
+    function min_length($min_length) {
+        if (mb_strlen($this->value, BASE_CHARSET) < $min_length) {
             $this->errors[] = 'Длина текста должна быть больше '.$min_length;
         }
         
         return $this;
     }
     
-    function max_length($max_length)
-    {
-        if (mb_strlen($this->value, BASE_CHARSET) > $max_length)
-        {
+    function max_length($max_length) {
+        if (mb_strlen($this->value, BASE_CHARSET) > $max_length) {
             $this->errors[] = 'Длина текста должна быть меньше '.$max_length;
         }
         

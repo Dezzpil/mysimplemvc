@@ -1,5 +1,5 @@
 <?
-namespace help;
+namespace msmvc\help;
 
 /**
  * Translate int to string in current currency

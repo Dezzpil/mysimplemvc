@@ -1,20 +1,31 @@
 <?php
+
+namespace msmvc\core;
+
 /**
  * Контроллер ядра MVC
  * от него должны наследовать рабочий контроллер
  * @author Dezzpil
  */
-class core_controller
-{
-    public function before()
-    {
-        // do something
-    }
-    
-    public function after()
-    {
-        // do something
-    }
-}
+abstract class controller {
 
+    protected $view;
+
+    /**
+     * @return view_interface
+     */
+    protected function getView() {
+        return $this->view;
+    }
+
+    /**
+     * @param view_interface $view
+     */
+    final function __construct(view_interface $view) {
+        $this->view = $view;
+    }
+
+    abstract public function before();
+    abstract public function after();
+}
 ?>

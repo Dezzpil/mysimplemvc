@@ -7,74 +7,77 @@
  * @see .htaccess in root
  */
 
-
 /**
  * you may create your own config
  */
-include("../config/config.php");
 
-// Constants
-defined('BASE_CHARSET') || define('BASE_CHARSET', 'utf-8');
-defined('HOST') || define('HOST', $_SERVER['HTTP_HOST']);
-defined('ABS_ROOT_PATH') || define('ABS_ROOT_PATH', $_SERVER['DOCUMENT_ROOT'].'/');
-
-// Database
-defined('NO_DB_USING') || define('NO_DB_USING', false);
-defined('DB_HOST') || define("DB_HOST", "localhost");
-defined('DB_NAME') || define("DB_NAME", "");
-defined('DB_USER') || define("DB_USER", "");
-defined('DB_PASS') || define("DB_PASS", "");
-defined('DB_SALT') || define("DB_SALT", "");
-
-// relation pathes
-define('ROOT_PATH', '/');
-define('CORE_PATH', ROOT_PATH.'core/');
-define('IMAGES_PATH', ROOT_PATH.'images/');
-define('JS_PATH', ROOT_PATH.'js/');
-define('CSS_PATH', ROOT_PATH.'css/');
-
-define('TEMPLATE_PATH', ROOT_PATH.'views/template/');
-define('ZONE_PATH', ROOT_PATH.'views/zones/');
-define('MODEL_PATH', ROOT_PATH.'models/');
-define('CONTROLLER_PATH', ROOT_PATH.'controllers/');
-
-// absolute pathes
-define('ABS_CORE_PATH', ABS_ROOT_PATH.'core/');
-define('ABS_IMAGES_PATH', ABS_ROOT_PATH.'images/');
-define('ABS_MODEL_PATH', ABS_ROOT_PATH.'models/');
-define('ABS_MODUL_PATH', ABS_MODEL_PATH.'modules/');
-
-define('ABS_TEMPLATE_PATH', ABS_ROOT_PATH.'views/template/');
-define('ABS_ZONE_PATH', ABS_ROOT_PATH.'views/zones/');
-define('ABS_MODEL_PATH', ABS_ROOT_PATH.'models/');
-define('ABS_CONTROLLER_PATH', ABS_ROOT_PATH.'controllers/');
-
-define('EXT', '.php');
+$configPath = __DIR__.'/../configs/config.php';
+if (is_readable($configPath)) {
+    require_once($configPath);
+}
 
 /**
- * include core models
- * its all in help\ namespace
- * @todo подключать модульно!
+ * transform error to Exceptions
  */
+
+function exception_error_handler($errno, $errstr, $errfile, $errline ) {
+    throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+}
+set_error_handler("exception_error_handler", E_ALL | E_ERROR | E_STRICT);
+
+/**
+ * include and start msmvc
+ */
+
 include_once(ABS_CORE_PATH.'mvc.php');
-include_once(ABS_CORE_PATH.'model/ajax.php');
-include_once(ABS_CORE_PATH.'model/array.php');
-include_once(ABS_CORE_PATH.'model/num.php');
-include_once(ABS_CORE_PATH.'model/session.php');
-include_once(ABS_CORE_PATH.'model/validator.php');
-include_once(ABS_CORE_PATH.'model/xhelp.php');
-include_once(ABS_CORE_PATH.'model/record.php');
-include_once(ABS_CORE_PATH.'model/exception/record.php');
-include_once(ABS_CORE_PATH.'model/exception/norecord.php');
-include_once(ABS_CORE_PATH.'model/query/exception.php');
-include_once(ABS_CORE_PATH.'model/query/where.php');
-include_once(ABS_CORE_PATH.'model/query/order.php');
+use \msmvc\core;
+$msmvc = core\mvc::instance();
 
-mvc::set_default('controller_prefix', 'controller_');
-mvc::set_default('model_prefix', 'model_');
+/**
+ * set default values
+ */
 
-global $MVC;
-$MVC = mvc::instance();
+$msmvc->setDefault(core\mvc::KEY_CONTROLLER_NAME, 'index');
+$msmvc->setDefault(core\mvc::KEY_ACTION_NAME, 'index');
+$msmvc->setDefault(core\mvc::KEY_NAMESPACE, APP_NAMESPACE);
+$msmvc->setDefault(core\mvc::KEY_NAMESPACE_MODELS, 'models');
+$msmvc->setDefault(core\mvc::KEY_NAMESPACE_CONTROLLERS, 'controllers');
 
-$MVC->request($_SERVER['REQUEST_URI']);
+/**
+ * we may choose view class for msmvc
+ * $view = new core\view_cli();
+ */
+
+$view = new core\view_html();
+$msmvc->setView($view);
+
+/**
+ * start session
+ */
+
+\msmvc\help\session::instance();
+
+try {
+
+    /**
+     * if we use phpunit, for example,
+     * we don't need to start request handling
+     */
+    if (
+        array_key_exists('REQUEST_URI', $_SERVER) !== false
+        && ! empty($_SERVER['REQUEST_URI'])
+    ) {
+        // only if there was any request
+        $msmvc->request($_SERVER['REQUEST_URI']);
+    }
+
+} catch (ErrorException $e) {
+
+    /**
+     * we may add some logger here
+     */
+    var_dump($e);
+}
+
+unset($msmvc);
 ?>

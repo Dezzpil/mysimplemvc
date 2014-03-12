@@ -1,5 +1,6 @@
 <?php
-namespace sql;
+
+namespace msmvc\sql;
 
 /*
  * To change this template, choose Tools | Templates
@@ -18,7 +19,7 @@ class query_exception extends \Exception {
     }
     
     public function __toString() {
-        echo "<pre>"; parent::__toString(); echo "</pre>";
+        return "<pre>".parent::__toString()."</pre>";
     }
 }
 

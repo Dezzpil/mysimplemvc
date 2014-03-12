@@ -1,20 +1,19 @@
 <?php
-namespace help;
-use \sql\query_where;
-use \sql\query_order;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+namespace msmvc\help;
+
+use msmvc\sql\query_exception;
+use msmvc\sql\query_where;
+use msmvc\sql\query_order;
+use msmvc\core\db;
 
 /**
- * Description of record
- *
+ * Provides simple abstraction for object mapping
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
+ * @todo rewrite using ORM
  */
+
 class record {
-    //put your code here
     
     const COL_TYPE_INT = 'int';
     const COL_TYPE_STRING = 'string';
@@ -23,25 +22,56 @@ class record {
     static protected $unicType = self::COL_TYPE_INT;
     static protected $tbl_name;
     
-    protected $changed_vals = array();
-    protected $loaded_vals = array();
+    protected $origin_vals = array();
+    protected $vals = array();
     protected $id = null;
-    
-    static function remove($key, $cmp_opertor, $val) {
-        $query = "DELETE FROM ".static::$tbl_name." where `{$key}`".$cmp_opertor.\db::prepare_string($val);
-        $result = \db::instance()->query($query);
-        
-        return $result;
-    }
-    
+
     /**
-     * Возвращает массив объектов
-     * @param \sql\query_where $where
-     * @param \sql\query_order $order
-     * @param type $limit
-     * @param type $asArray
+     * @param query_where $where
+     * @throws \Exception|\msmvc\sql\query_exception
+     */
+    static function delete(query_where $where) {
+        $query = "DELETE FROM ".static::$tbl_name.$where->get_prepared();
+        try {
+            db::instance()->query($query);
+        } catch (query_exception $e) {
+            throw $e;
+        }
+    }
+
+    static function getUnicKey() {
+        return self::$unicKey;
+    }
+
+    static protected $loadedVars = array();
+
+    /**
+     * @param $id
      * @throws query_exception
-     * @return \static
+     * @throws norecord_exception
+     */
+    static function load($id) {
+        if (static::$unicType == 'string') $id = '"'.$id.'"';
+        $query = 'select * from '.static::$tbl_name.' where '.static::$unicKey.'='.$id;
+        $props = db::instance()->query($query);
+
+        if (! empty($props)) {
+
+            self::saveQueriedToClass($props[0]);
+            return new static;
+
+        } else {
+            throw new norecord_exception('No object with given id');
+        }
+    }
+
+    /**
+     * @param query_where $where
+     * @param query_order $order
+     * @param array $limit
+     * @param bool $asArray
+     * @return array
+     * @throws norecord_exception
      */
     static function get_list(
             query_where $where = null, 
@@ -67,21 +97,18 @@ class record {
                     $query .= ' LIMIT '.$limit[0].','.$limit[1]; break;
             }
         }
-        
-        $result = \db::instance()->query($query);
+
+        $result = db::instance()->query($query);
+
+        if (empty($result)) {
+            throw new norecord_exception('No rows in '.self::$tbl_name.' in result by query '.$query);
+        }
 
         $objects = array();
         foreach ($result as $row) {
-            
+
+            self::saveQueriedToClass($row);
             $obj = new static();
-            
-            foreach ($row as $key => $val) {
-                if (NEED_TO_CONVERT_UTF8) {
-                    $obj->$key = xhelp::win1251_to_utf8($val);
-                } else {
-                    $obj->$key = $val;
-                }
-            }
            
             if ($asArray) $objects[$row[static::$unicKey]] = $obj->toArray();
             else $objects[$row[static::$unicKey]] = $obj;
@@ -89,82 +116,154 @@ class record {
         
         return $objects;
     }
-    
+
     static function add() {
         return new static();
     }
 
     /**
-     * @param type $id
-     * @throws query_exception
-     * @throws norecord_exception
+     * Set argumented values to class context,
+     * usually argument contains result from query
+     *
+     * @param $row
      */
-    public function __construct($id = null) {
-        
-        if ($id !== null) { 
-            $this->load($id);
-        }
-    }
-    
-    /**
-     * 
-     * @param type $id
-     * @throws query_exception
-     * @throws norecord_exception
-     */
-    protected function load($id) {
-        if (static::$unicType == 'string') $id = '"'.$id.'"';
-        $query = 'select * from '.static::$tbl_name.' where '.static::$unicKey.'='.$id;
-        $props = \db::instance()->query($query);
-        
-        if (! empty($props)) {
-            foreach ($props[0] as $name => $val) {
-                $this->$name = $val;
+    protected static function saveQueriedToClass($row) {
+        foreach ($row as $key => $val) {
+            if (NEED_TO_CONVERT_UTF8) {
+                self::$loadedVars[$key] = charset::win1251_to_utf8($val);
+            } else {
+                self::$loadedVars[$key] = $val;
             }
-        } else {
-            throw new norecord_exception('No object with given id');
         }
     }
-    
+
+    /**
+     * Set changed values to class context
+     */
+    protected function saveChangesToClass() {
+        foreach ($this->vals as $key => $val) {
+            if (NEED_TO_CONVERT_UTF8) {
+                self::$loadedVars[$key] = charset::win1251_to_utf8($val);
+            } else {
+                self::$loadedVars[$key] = $val;
+            }
+        }
+    }
+
+    /**
+     * Set origin vals from class context
+     */
+    protected function loadValuesFromClass() {
+        if ( ! empty(static::$loadedVars)) {
+            foreach (static::$loadedVars as $key => $val) {
+                $this->origin_vals[$key] = $val;
+            }
+            static::$loadedVars = array();
+        }
+    }
+
+    /**
+     * Get values from class context,
+     * when instance object
+     */
+    public function __construct() {
+        $this->loadValuesFromClass();
+    }
+
     function __set($key, $value) {
-        $this->loaded_vals[$key] = $value;
+        $this->set($key, $value);
     }
     
     function __get($key) {
-        return @$this->loaded_vals[$key];
+        return $this->get($key);
     }
-    
+
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
     function set($key, $value) {
-        $this->changed_vals[$key] = @$this->loaded_vals[$key];
-        
         if (NEED_TO_CONVERT_UTF8) {
             if (is_string($value)) {
-                $value = xhelp::utf8_to_win1251($value);
+                $value = charset::utf8_to_win1251($value);
             }
         }
         
-        $this->loaded_vals[$key] = $value;
+        $this->vals[$key] = $value;
+
+        if (empty($this->origin_vals[$key])) {
+            $this->origin_vals[$key] = @$this->vals[$key];
+        }
+
         return $this;
     }
-    
-    function get($key) {
-        return @$this->loaded_vals[$key];
+
+    /**
+     * @param $key
+     * @return mixed
+     */
+    protected function getOrigin($key) {
+        return @$this->origin_vals[$key];
     }
 
-     /**
-     * 
-     * @return int
-     * @throws \record_exception
+    /**
+     * @param $key
+     * @return mixed
+     */
+    function get($key) {
+        //$val = @$this->vals[$key];
+        $val = arr::get($key, $this->vals);
+        if ( ! $val) $val = $this->getOrigin($key);
+
+        return $val;
+    }
+
+
+    /**
+     * @return string
+     * @deprecated
+     * @throws record_exception
      */
     function get_id() {
         
         $idKey = static::$unicKey;
-        
-        if ($this->$idKey !== null) {
-            return $this->$idKey;
+        //$id = @$this->origin_vals[$idKey];
+        $id = arr::get('id', $this->origin_vals);
+
+        if ( ! empty($id) && $id !== null) {
+            return $id;
         }
         
-        throw new record_exception('Id ('.$idKey.') для объекта сущности '.static::$tbl_name.' неопределен');
+        throw new record_exception(
+            'Id ('.$idKey.') for essence '.static::$tbl_name.' undefined'
+        );
+    }
+
+    /**
+     * @return mixed
+     * @throws record_exception
+     */
+    function getId() {
+        return $this->get_id();
+    }
+
+    /**
+     * @param $val
+     */
+    function setId($val) {
+        self::$loadedVars[static::$unicKey] = $val;
+        $this->id = $val;
+        $this->loadValuesFromClass();
+    }
+
+    /**
+     * @return array|int|string
+     */
+    function remove() {
+        $query = "DELETE FROM ".static::$tbl_name." where `".self::getUnicKey()."`=".$this->getId();
+        $result = db::instance()->query($query);
+        return $result;
     }
 
     /**
@@ -172,22 +271,37 @@ class record {
      * @throws query_exception
      */
     function save() {
-        $idKey = static::$unicKey;
-        if (intval($this->$idKey) > 0) {
+
+        $this->beforeSave();
+
+        try {
+
+            $this->getId();
             $this->update();
-        } else {
-            $this->$idKey = $this->insert();
+
+        } catch (record_exception $e) {
+
+            $userId = $this->insert();
+            $this->setId($userId);
+
         }
-        
+
+        $this->saveChangesToClass();
+        $this->loadValuesFromClass();
+        $this->afterSave();
+
         return $this;
     }
-    
+
+    /**
+     * @return array|int|string
+     */
     protected function update() {
         $idKey = static::$unicKey;
         $query = "UPDATE ".static::$tbl_name." SET ";
-        foreach ($this->changed_vals as $prop => $value) {
+        foreach ($this->vals as $prop => $value) {
             $query .= $prop."=";
-            $value = \db::prepare_string($this->loaded_vals[$prop]);
+            $value = db::prepare_string($value);
             if (is_string($value)) $query .= "'".$value."'";
             elseif (is_int($value)) $query .= $value;
             elseif (is_float($value)) $query .= $value;
@@ -196,14 +310,15 @@ class record {
         }
 
         $query = substr($query, 0, strlen($query) - 2);
-        $query .= " WHERE ".$idKey."=".$this->$idKey;
-        return \db::instance()->query($query);
+        $query .= " WHERE ".$idKey."=".$this->getId();
+        $result = db::instance()->query($query);
+        return $result;
     }
     
     protected function insert() {
-        $query = "insert into ".static::$tbl_name." (".join(",", array_keys($this->loaded_vals)).") values (";
-        foreach ($this->loaded_vals as $value) {
-            $value = \db::prepare_string($value);
+        $query = "insert into ".static::$tbl_name." (".join(",", array_keys($this->vals)).") values (";
+        foreach ($this->vals as $value) {
+            $value = db::prepare_string($value);
             if (is_string($value)) $query .= "'".$value."'";
             elseif (is_int($value)) $query .= $value;
             elseif (is_float($value)) $query .= $value;
@@ -213,18 +328,86 @@ class record {
         $query = substr($query, 0, strlen($query) - 2);
         $query .= ")";
         
-        $result = \db::instance()->query($query);
+        $result = db::instance()->query($query);
+
+
         return $result;
     }
-    
-    public function toArray() {
+
+    /**
+     * @return array
+     */
+    function toArray() {
         $array = array();
-        foreach ($this->loaded_vals as $key => $val) {
+        $vals = $this->origin_vals;
+
+        try {
+            $this->getId();
+        } catch (record_exception $e) {
+            $vals = $this->vals;
+        }
+
+        foreach ($vals as $key => $val) {
             if (is_object($val)) $val = $val->toArray();
             $array[$key] = $val;
         }
         
         return $array;
+    }
+
+    /**
+     * hooks mechanism
+     */
+
+    const HOOK_BEFORE_SAVE = 1;
+    const HOOK_AFTER_SAVE = 2;
+
+    protected $hookStorage = array(
+        1 => array(),
+        2 => array()
+    );
+
+    /**
+     * @param int $hookInt
+     * @param function $fn
+     * @param array $argv
+     */
+    protected function addHook($hookInt, $fn, $argv = array()) {
+        array_push(
+            $this->hookStorage[$hookInt],
+            array('fn' => $fn, 'argv' => $argv)
+        );
+    }
+
+    /**
+     * @param int $hookInt
+     */
+    protected function clearHooks($hookInt) {
+        $this->hookStorage[$hookInt] = array();
+    }
+
+    /**
+     * @param int $hookInt
+     */
+    protected function execHook($hookInt) {
+        if ( ! empty($this->hookStorage[$hookInt]))
+            foreach ($this->hookStorage[$hookInt] as $hook) {
+                $argv = array_merge(array('me' => $this), $hook['argv']);
+                //$argv = $hook['argv'];
+                call_user_func_array($hook['fn'], $argv);
+            }
+    }
+
+    /**
+     * hooks bindings
+     */
+
+    protected function beforeSave() {
+        $this->execHook(self::HOOK_BEFORE_SAVE);
+    }
+
+    protected function afterSave() {
+        $this->execHook(self::HOOK_AFTER_SAVE);
     }
     
 }

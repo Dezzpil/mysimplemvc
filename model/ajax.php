@@ -1,5 +1,5 @@
 <?php
-namespace help;
+namespace msmvc\help;
 
 /**
  * Form ajax response
