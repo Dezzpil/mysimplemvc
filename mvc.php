@@ -61,7 +61,7 @@ class mvc {
             $path .= array_shift($folders).DIRECTORY_SEPARATOR;
         }
 
-        return substr($path, 0, -1).EXT;
+        return substr($path, 0, -1).'.php';
     }
 
     /**
@@ -176,10 +176,6 @@ class mvc {
 
         $controllerFile = array_shift($mvc_request);
         $actionName = array_shift($mvc_request);
-
-        $params = array();
-        if ( ! empty($mvc_request))
-            $params = $mvc_request;
 
         $this->requestMVC($controllerFile, $actionName);
     }

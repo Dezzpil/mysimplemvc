@@ -1,0 +1,5 @@
+AddDefaultCharset utf-8
+RewriteEngine on
+RewriteCond %{REQUEST_URI} !^/core/init.php
+RewriteCond %{REQUEST_URI} !^.*[jpg|jpeg|gif|png|css|js|ico|doc|docx|txt|md|pdf|html|htm]$
+RewriteRule ^(.*)$ /core/init.php [L]

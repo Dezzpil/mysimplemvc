@@ -7,6 +7,8 @@ namespace msmvc\help;
  * Supports chaining.
  * Use get_errors() for get errors. If errors array is empty,
  * then value is correct.
+ *
+ * @todo must throw exceptions!
  * 
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
  */
@@ -16,7 +18,14 @@ class validator
     
     protected $alphabet_eng = 'a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,r,s,t,q,u,v,w,x,y,z';
     protected $alphabet_ru = 'а,б,в,г,д,е,ё,ж,з,и,й,к,л,м,н,о,п,р,с,т,у,ф,х,ц,ч,ш,щ,ъ,ы,ь,э,ю,я';
-    //protected $ints = '1,2,3,4,5,6,7,8,9,0';
+
+    /**
+     * @param $value
+     * @return validator
+     */
+    static function factory($value) {
+        return new self($value);
+    }
     
     /**
      * Get errors array (simple array)
@@ -31,7 +40,11 @@ class validator
     function __construct($value) {
         $this->value = $value;
     }
-    
+
+    /**
+     * Проверка корректности email
+     * @return $this
+     */
     function email() {
         if ( ! filter_var($this->value, FILTER_VALIDATE_EMAIL)) {
             $this->errors[] = 'Email указан неверно';
@@ -39,7 +52,12 @@ class validator
         
         return $this;
     }
-    
+
+    /**
+     * Минимальная длина строки
+     * @param $min_length
+     * @return $this
+     */
     function min_length($min_length) {
         if (mb_strlen($this->value, BASE_CHARSET) < $min_length) {
             $this->errors[] = 'Длина текста должна быть больше '.$min_length;
@@ -47,7 +65,12 @@ class validator
         
         return $this;
     }
-    
+
+    /**
+     * Максимальная длина строки
+     * @param $max_length
+     * @return $this
+     */
     function max_length($max_length) {
         if (mb_strlen($this->value, BASE_CHARSET) > $max_length) {
             $this->errors[] = 'Длина текста должна быть меньше '.$max_length;
@@ -55,7 +78,12 @@ class validator
         
         return $this;
     }
-    
+
+    /**
+     * Цифры и перечисленные символы
+     * @param $symbols
+     * @return $this
+     */
     function ints_and_symbols($symbols) {
         for ($i = 0; $i < mb_strlen($this->value, BASE_CHARSET); $i++) {
             $letter = $this->value[$i];
@@ -80,7 +108,12 @@ class validator
         
          return $this;
     }
-    
+
+    /**
+     * Латинские буквы и перечисленные символы
+     * @param $symbols
+     * @return $this
+     */
     function latin_and_symbols($symbols)
     {
         for ($i = 0; $i < mb_strlen($this->value, BASE_CHARSET); $i++)

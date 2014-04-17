@@ -24,19 +24,23 @@ abstract class view_interface {
      * @param $name
      * @param $zoneVarName
      * @param array $data
+     * @return $this
      */
     function setViewTemplate($name, $zoneVarName, $data = array()) {
         self::$zoneVarName = $zoneVarName;
         self::$templateName = $name;
         if ( ! empty($data))
             self::$templateData = $data;
+        return $this;
     }
 
     /**
      * @param $data
+     * @return $this
      */
     function setViewTemplateData($data) {
         self::$templateData = $data;
+        return $this;
     }
 
     /**
@@ -46,6 +50,24 @@ abstract class view_interface {
         return self::$templateData;
     }
 
+    /**
+     * @param $key
+     * @param $val
+     * @return $this
+     */
+    function setViewTemplateParam($key, $val) {
+        self::$templateData[$key] = $val;
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     */
+    function getViewTemplateParam($key) {
+        return @self::$templateData[$key];
+    }
+
 
     static public $zonePath;
     static public $zoneData = array();
@@ -53,18 +75,22 @@ abstract class view_interface {
     /**
      * @param $path
      * @param array $data
+     * @return $this
      */
     function setViewZone($path, $data = array()) {
         self::$zonePath = $path;
         if ( ! empty($data))
             self::$zoneData = $data;
+        return $this;
     }
 
     /**
      * @param $data
+     * @return $this
      */
     function setViewZoneData($data) {
         self::$zoneData = $data;
+        return $this;
     }
 
     /**
@@ -74,14 +100,34 @@ abstract class view_interface {
         return self::$zoneData;
     }
 
+    /**
+     * @param $key
+     * @param $val
+     * @return $this
+     */
+    function setViewZoneParam($key, $val) {
+        self::$zoneData[$key] = $val;
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     */
+    function getViewZoneParam($key) {
+        return @self::$zoneData[$key];
+    }
+
 
     static protected $asset = null;
 
     /**
      * @param view_asset $asset
+     * @return $this
      */
     function setAsset(view_asset $asset) {
         self::$asset = $asset;
+        return $this;
     }
 
 
@@ -193,9 +239,11 @@ abstract class view_interface {
 
     /**
      * @param $data
+     * @return $this
      */
     function setCurrentData($data) {
         $this->data = $data;
+        return $this;
     }
 
     /**

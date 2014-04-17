@@ -129,11 +129,7 @@ class record {
      */
     protected static function saveQueriedToClass($row) {
         foreach ($row as $key => $val) {
-            if (NEED_TO_CONVERT_UTF8) {
-                self::$loadedVars[$key] = charset::win1251_to_utf8($val);
-            } else {
-                self::$loadedVars[$key] = $val;
-            }
+            self::$loadedVars[$key] = $val;
         }
     }
 
@@ -142,11 +138,7 @@ class record {
      */
     protected function saveChangesToClass() {
         foreach ($this->vals as $key => $val) {
-            if (NEED_TO_CONVERT_UTF8) {
-                self::$loadedVars[$key] = charset::win1251_to_utf8($val);
-            } else {
-                self::$loadedVars[$key] = $val;
-            }
+            self::$loadedVars[$key] = $val;
         }
     }
 
@@ -184,12 +176,7 @@ class record {
      * @return $this
      */
     function set($key, $value) {
-        if (NEED_TO_CONVERT_UTF8) {
-            if (is_string($value)) {
-                $value = charset::utf8_to_win1251($value);
-            }
-        }
-        
+
         $this->vals[$key] = $value;
 
         if (empty($this->origin_vals[$key])) {

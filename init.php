@@ -1,11 +1,4 @@
 <?php
-/**
- * init.php
- * uses in .htaccess for init MVC
- * 
- * @author Nick Dezzpil Orlov <n.dezz.orlov@gmail.com> 
- * @see .htaccess in root
- */
 
 /**
  * you may create your own config

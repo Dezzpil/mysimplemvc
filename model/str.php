@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: dezzpil
- * Date: 1/5/14
- * Time: 2:54 PM
- * To change this template use File | Settings | File Templates.
- */
 
 namespace msmvc\help;
 
