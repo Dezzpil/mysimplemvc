@@ -7,9 +7,7 @@
 ## Установка
 
 1. Склонить mysmvc в папку core/.
-
-2 Если используем Apache, то переместить core/examples/.htaccess в корень сайта. Если Nginx, то скопировать core/examples/nginx.conf в %nginx%/sites-enabled/ и заменить @project на правильное значение.
-
+2. Если используем Apache, то переместить core/examples/.htaccess в корень сайта. Если Nginx, то скопировать core/examples/nginx.conf в %nginx%/sites-enabled/ и заменить @project на правильное значение.
 3. Использовать следующие команды для создания директорий по умолчанию:
 
     mkdir assets
