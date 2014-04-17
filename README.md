@@ -1,5 +1,5 @@
 # My Simple MVC
-===========
+---
 
 Простой MVC фреймворк для создания очень простых сайтов на PHP >= 5.4 + MySQL.
 Устанавливается в отдельную папку (по умолчанию - core/) в корне сайта.
@@ -8,8 +8,7 @@
 
 1. Склонить mysmvc в папку core/.
 
-2.1 Если используем Apache, то переместить core/examples/.htaccess в корень сайта.
-2.2 Если Nginx, то скопировать core/examples/nginx.conf в %nginx%/sites-enabled/ и заменить @project на правильное значение.
+2 Если используем Apache, то переместить core/examples/.htaccess в корень сайта. Если Nginx, то скопировать core/examples/nginx.conf в %nginx%/sites-enabled/ и заменить @project на правильное значение.
 
 3. Использовать следующие команды для создания директорий по умолчанию:
 
@@ -28,7 +27,7 @@
 
 ## Инструкция по использованию
 
-Авто-подключение файлов осуществляется по стандарту (PSR-0)[https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md].
+Авто-подключение файлов осуществляется по стандарту [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
 
 ### Мой первый контроллер
 
