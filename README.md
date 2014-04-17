@@ -8,17 +8,17 @@
 
 1. Склонить mysmvc в папку core/.
 2. Если используем Apache, то переместить core/examples/.htaccess в корень сайта. Если Nginx, то скопировать core/examples/nginx.conf в %nginx%/sites-enabled/ и заменить @project на правильное значение.
-3. Использовать следующие команды для создания директорий по умолчанию:
+3. Использовать следующие команды для создания директорий по умолчанию
 
-    mkdir assets
-    mkdir configs
-    mkdir controllers
-    mkdir core
-    mkdir models
-    mkdir vendor
-    mkdir views
-    mkdir views/template
-    mkdir views/zones
+        mkdir assets
+        mkdir configs
+        mkdir controllers
+        mkdir core
+        mkdir models
+        mkdir vendor
+        mkdir views
+        mkdir views/template
+        mkdir views/zones
 
 4. Скопировать core/examples/config.php в configs/config.php и поправить конфигурацию.
 5. Скопировать core/examples/errors/ в errors/.
@@ -116,8 +116,10 @@ _Дописать_
 
             $user_id = $user->save();
 
+            // пользователь сохранен, теперь его можно получить из БД
             $user = user::load($user_id);
 
+            // или получить полный список пользователей из БД
             $users = user::get_list();
 
         }
