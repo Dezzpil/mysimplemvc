@@ -27,22 +27,12 @@ use \msmvc\core;
 $msmvc = core\mvc::instance();
 
 /**
- * set default values
- */
-
-$msmvc->setDefault(core\mvc::KEY_CONTROLLER_NAME, 'index');
-$msmvc->setDefault(core\mvc::KEY_ACTION_NAME, 'index');
-$msmvc->setDefault(core\mvc::KEY_NAMESPACE, APP_NAMESPACE);
-$msmvc->setDefault(core\mvc::KEY_NAMESPACE_MODELS, 'models');
-$msmvc->setDefault(core\mvc::KEY_NAMESPACE_CONTROLLERS, 'controllers');
-
-/**
  * we may choose view class for msmvc
  * $view = new core\view_cli();
  */
 
 $view = new core\view_html();
-$msmvc->setView($view);
+$msmvc->setViewType($view);
 
 /**
  * start session
@@ -52,19 +42,10 @@ $msmvc->setView($view);
 
 try {
 
-    /**
-     * if we use phpunit, for example,
-     * we don't need to start request handling
-     */
-    if (
-        array_key_exists('REQUEST_URI', $_SERVER) !== false
-        && ! empty($_SERVER['REQUEST_URI'])
-    ) {
-        // only if there was any request
-        $msmvc->request($_SERVER['REQUEST_URI']);
-    }
+    $request = core\request::instance();
+    $msmvc->run($request);
 
-} catch (ErrorException $e) {
+} catch (core\request_exception $e) {
 
     /**
      * we may add some logger here

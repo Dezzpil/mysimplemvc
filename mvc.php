@@ -8,7 +8,8 @@ namespace msmvc\core;
  */
 class mvc {
 
-    static private $_instance;
+    static protected $_instance = null;
+    static protected $namespace = 'msmvc';
 
     /**
      * @return mvc
@@ -22,7 +23,6 @@ class mvc {
             spl_autoload_register(function($className) {
 
                 $path = self::convertToPath($className);
-
                 if (is_readable($path))
                     include_once($path);
                 else
@@ -45,11 +45,14 @@ class mvc {
         $folders = explode('_', array_pop($namespaces));
 
         if ( ! empty($namespaces)) {
-            if ($namespaces[0] != APP_NAMESPACE) {
-                $path = ABS_VENDOR_PATH;
-            } else {
+            if ($namespaces[0] == self::$namespace) { // выбираем файлы движка, включая модули
+                $path = ABS_CORE_PATH;
+                array_shift($namespaces);
+            } else if ($namespaces[0] == APP_NAMESPACE) { // выбираем файлы приложения
                 $path = ABS_ROOT_PATH;
                 array_shift($namespaces);
+            } else {                                 // выбираем файлы вендоров
+                $path = ABS_VENDOR_PATH;
             }
 
             while (count($namespaces) > 0) {
@@ -66,20 +69,21 @@ class mvc {
 
     /**
      * @param $request
-     * @deprecated
+     * @deprecated use mvc::redirectHeader($uri);
      */
     static function redirect($request) {
         self::instance()->request($request);
     }
 
     /**
+     * @deprecated use mvc::instance()->run();
      * @param string $controllerFile (without prefix)
      * @param string $actionName
      * @param array $params
      * @throws mvc_exception
      */
     static function redirectController($controllerFile, $actionName, $params = array()) {
-        self::instance()->requestMVC($controllerFile, $actionName, $params);
+        self::instance()->run($controllerFile, $actionName, $params);
     }
 
     /**
@@ -94,6 +98,7 @@ class mvc {
     private $view;
     
     private function __construct() {
+
         // классы для работы с представлением
         include_once 'view/interface.php';
         include_once 'view/exceptions.php';
@@ -102,8 +107,10 @@ class mvc {
         include_once 'view/html.php';
         include_once 'view/cli.php';
 
+        include_once 'request_exception.php';
         include_once 'request.php';
-        include_once 'response.php';
+
+        // include_once 'response.php';
 
         include_once 'mvc_exception.php';
 
@@ -139,103 +146,69 @@ class mvc {
     const KEY_NAMESPACE = 'namespace';
     const KEY_NAMESPACE_CONTROLLERS = 'namespace_controllers';
     const KEY_NAMESPACE_MODELS = 'namespace_models';
+    const KEY_NAMESPACE_MODULES = 'namespace_modules';
 
     private $defaultOpts = array(
         'controller'            => 'index',
         'action'                => 'index',
         'namespace'             => 'newApp',
         'namespace_models'      => 'models',
-        'namespace_controllers' => 'controllers'
+        'namespace_controllers' => 'controllers',
+        'namespace_modules'     => 'modules'
     );
 
     /**
-     * @param $key
+     * Переопределить значение по умолчанию:
+     *   'controller'            => 'index',
+     *   'action'                => 'index',
+     *   'namespace'             => 'newApp',
+     *   'namespace_models'      => 'models',
+     *   'namespace_controllers' => 'controllers',
+     *   'namespace_modules'     => 'modules'
+     *
+     * @param string $key смотри константы mvc!
      * @param $value
-     * @return bool
+     * @return $this
      */
     function setDefault($key, $value) {
         if (array_key_exists($key, $this->defaultOpts) !== false) {
             $this->defaultOpts[$key] = $value;
-            return true;
         }
+        return $this;
     }
 
     /**
+     * Получить значение по умолчанию
+     * @param $key
+     * @return mixed
+     */
+    function getDefault($key) {
+        return @$this->defaultOpts[$key];
+    }
+
+    /**
+     * Установить тип представления (html,cli,...)
      * @param view_interface $view
      */
-    function setView(view_interface $view) {
+    function setViewType(view_interface $view) {
         $this->view = $view;
     }
 
     /**
-     * @param string $request
-     * @throws mvc_exception
-     */
-    function request($request) {
-        $mvc_request = $this->parse_request_uri($request);
-
-        $controllerFile = array_shift($mvc_request);
-        $actionName = array_shift($mvc_request);
-
-        $this->requestMVC($controllerFile, $actionName);
-    }
-
-
-    /**
-     * @param string $controllerFile
-     * @param string $actionName
+     * Выполнить запрос
+     * @param request $request
      * @param array $params
      * @throws mvc_exception
      */
-    function requestMVC($controllerFile, $actionName, $params = array()) {
+    function run(request $request, $params = array()) {
         try {
-            $this->exec_controller($controllerFile, $actionName, $params);
+            $this->exec_controller($request->get_controller_name(), $request->get_action_name(), $params);
             $this->render();
         } catch (mvc_exception $e) {
             throw new mvc_exception($e->message);
         }
     }
-    
-    /**
-     * Получить массив, где 0 - имя контроллера, 1 - имя действия контроллера, 2 - параметры (если есть)
-     * @param string $request
-     * @return array 
-     */
-    function parse_request_uri($request) {
-        $tmp_ar_request = explode('/', $request);
-        
-        // отсеим пустые значения после explode
-        // и тем самым соберем финальный массив обращения
-        // где 0 - имя контроллера, 1 - действия
-        $ar_request = array();
-        foreach($tmp_ar_request as $part) {
-            $part = trim($part);
-            if (strlen($part) > 0) $ar_request[] = $part;
-        }
 
-        
-        if (count($ar_request) == 0) {
-            // пустой REQUEST_URI
-            return array(
-                $this->defaultOpts[self::KEY_CONTROLLER_NAME],
-                $this->defaultOpts[self::KEY_ACTION_NAME]
-            );
-        }
-        
-        if (count($ar_request) == 1) {
-            // REQUEST_URI указывает только на контроллер
-            return array(
-                $ar_request[0],
-                $this->defaultOpts[self::KEY_ACTION_NAME]
-            );
-        }
-
-        // действие может содержать параметры запроса
-        // тогде вынесем их в param1, param2
-
-        return $ar_request;
-    }
-    
     function render() {
         die($this->view->complete());
     }
