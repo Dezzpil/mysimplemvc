@@ -1,6 +1,6 @@
 <?php
 
-namespace msmvc\sql;
+namespace msmvc\model;
 
 /*
  * To change this template, choose Tools | Templates
@@ -12,9 +12,9 @@ namespace msmvc\sql;
  *
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
  */
-class query_exception extends \Exception {
+class exception_query extends \Exception {
     
-    public function __construct($message, $code, $previous) {
+    public function __construct($message, $code, $previous = null) {
         parent::__construct($message, $code, $previous);
     }
     

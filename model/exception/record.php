@@ -1,11 +1,11 @@
 <?php
 
-namespace msmvc\help;
+namespace msmvc\model;
 
 /**
  * Error in query
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
  */
-class record_exception extends \Exception {}
+class exception_record extends \Exception {}
 
 ?>

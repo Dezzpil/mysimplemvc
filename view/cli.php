@@ -1,6 +1,6 @@
 <?php
 
-namespace msmvc\core;
+namespace msmvc;
 
 /**
  * Class view_cli

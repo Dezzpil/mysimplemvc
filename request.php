@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace msmvc\core;
+namespace msmvc;
 
 /**
  * Class request
@@ -19,7 +19,7 @@ class request {
 
     /**
      * @return request
-     * @throws request_exception
+     * @throws exception_request
      */
     static function instance() {
 
@@ -38,7 +38,7 @@ class request {
 
             } else {
 
-                throw new request_exception('no request uri');
+                throw new exception_request('no request uri');
 
             }
 
@@ -55,16 +55,32 @@ class request {
 
         $this->request_uri = $request;
         $mvc_request = $this->parse_request_uri($request);
-        $this->controller_name = array_shift($mvc_request);
-        $this->action_name = array_shift($mvc_request);
+
+        $names = $this->collect_names($mvc_request);
+
+        $this->action_name = $names['action'];
+        $this->controller_name = $names['controller'];
+    }
+
+    protected function collect_names($parts) {
+        $action_name = array_pop($parts);
+        $controller_name = join('/', $parts);
+
+        return array(
+            'controller' => $controller_name,
+            'action' => $action_name
+        );
     }
 
     /**
-     * Получить массив, где 0 - имя контроллера, 1 - имя действия контроллера, 2 - параметры (если есть)
+     * Получить массив, где
+     * 0 - имя контроллера (может быть вложенным именем, типа api/sign),
+     * 1 - имя действия контроллера
      * @param string $request
      * @return array
      */
     protected function parse_request_uri($request) {
+        $request = parse_url($request, PHP_URL_PATH);
         $tmp_ar_request = explode('/', $request);
 
         // отсеим пустые значения после explode
@@ -128,8 +144,10 @@ class request {
      */
     function is_equal($uri) {
         $result = $this->parse_request_uri($uri);
-        $controller_name = array_shift($result);
-        $action_name = array_shift($result);
+
+        $names = $this->collect_names($result);
+        $controller_name = $names['controller'];
+        $action_name = $names['action'];
 
         if (
             $controller_name == $this->get_controller_name() &&

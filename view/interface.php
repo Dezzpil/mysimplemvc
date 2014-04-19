@@ -7,8 +7,8 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace msmvc\core;
-use msmvc\help\arr;
+namespace msmvc;
+use msmvc\model\arr;
 
 /**
  * Class view_interface
@@ -169,13 +169,13 @@ abstract class view_interface {
      * @param array $data
      * @param view_asset $asset
      * @return string
-     * @throws noViewZoneException
+     * @throws exception_view_nozone
      */
     protected function renderParts($zoneFileName, array $data = array(), view_asset $asset = null) {
 
         $zoneFilePath = ABS_ZONE_PATH.$zoneFileName.'.php';
         if ( ! is_readable($zoneFilePath)) {
-            throw new noViewZoneException();
+            throw new exception_view_nozone();
         }
 
         $this->setCurrentData($data);

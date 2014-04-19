@@ -23,29 +23,30 @@ set_error_handler("exception_error_handler", E_ALL | E_ERROR | E_STRICT);
  */
 
 include_once(ABS_CORE_PATH.'mvc.php');
-use \msmvc\core;
-$msmvc = core\mvc::instance();
+
+
+$msmvc = \msmvc\mvc::instance();
 
 /**
  * we may choose view class for msmvc
  * $view = new core\view_cli();
  */
 
-$view = new core\view_html();
+$view = new \msmvc\view_html();
 $msmvc->setViewType($view);
 
 /**
  * start session
  */
 
-\msmvc\help\session::instance();
+\msmvc\model\session::instance();
 
 try {
 
-    $request = core\request::instance();
+    $request = \msmvc\request::instance();
     $msmvc->run($request);
 
-} catch (core\request_exception $e) {
+} catch (\msmvc\exception_request $e) {
 
     /**
      * we may add some logger here

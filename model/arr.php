@@ -1,5 +1,5 @@
 <?php
-namespace msmvc\help;
+namespace msmvc\model;
 
 /**
  * Some common method for array

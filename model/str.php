@@ -1,6 +1,6 @@
 <?php
 
-namespace msmvc\help;
+namespace msmvc\model;
 
 
 class str {

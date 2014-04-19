@@ -1,5 +1,5 @@
 <?
-namespace msmvc\help;
+namespace msmvc\model;
 
 /**
  * Tools

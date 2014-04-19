@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace msmvc\core;
+namespace msmvc;
 use msmvc\help\arr;
 
 /**

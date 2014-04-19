@@ -1,6 +1,6 @@
 <?php
 
-namespace msmvc\sql;
+namespace msmvc\model;
 
 /**
  * Model 

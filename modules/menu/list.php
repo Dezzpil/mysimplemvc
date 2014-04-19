@@ -2,7 +2,7 @@
 
 namespace msmvc\modules;
 
-use msmvc\core\request;
+use msmvc\request;
 
 /**
  * Class menu

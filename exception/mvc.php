@@ -1,6 +1,6 @@
 <?php
 
-namespace msmvc\core;
+namespace msmvc;
 
 /**
  * Общий наследумый класс исключений для моделей
@@ -10,7 +10,7 @@ namespace msmvc\core;
  * @todo make often http errors and add headers to response
  * @author Nikita Dezzpil Orlov
  */
-class mvc_exception extends \Exception {
+class exception_mvc extends \Exception {
 
     protected $message;
     protected $homepage;

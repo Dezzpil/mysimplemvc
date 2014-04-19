@@ -1,9 +1,7 @@
 <?php
 
-namespace msmvc\core;
-
-use msmvc\sql;
-use msmvc\help;
+namespace msmvc;
+use msmvc\model\exception_query;
 
 /**
  * Common MYSQL base connector
@@ -29,7 +27,7 @@ class db {
         $this->handle = mysqli_connect(DB_HOST, DB_USER, DB_PASS);
         
         if ($this->handle === FALSE) {
-            throw new db_exception('Can\'t connect to MySQL');
+            throw new exception_db('Can\'t connect to MySQL');
         }
         
         mysqli_select_db($this->handle, DB_NAME);
@@ -60,7 +58,7 @@ class db {
             return $result;
         } 
         catch (Exception $e) {
-            self::$last_error = new query_exception(
+            self::$last_error = new exception_query(
                 mysqli_error($this->handle),
                 mysqli_errno($this->handle)
             );
@@ -91,7 +89,7 @@ class db {
                 }
             }
         } catch (Exception $e) {
-            self::$last_error = new query_exception(
+            self::$last_error = new exception_query(
                 mysqli_error($this->handle),
                 mysqli_errno($this->handle)
             );

@@ -1,6 +1,6 @@
 <?php
 
-namespace msmvc\core;
+namespace msmvc;
 
 /**
  * Class view_html
@@ -15,7 +15,7 @@ class view_html extends view_interface {
 
         $path = trim(self::$zonePath);
         if ( ! $path)
-            throw new emptyViewZoneException();
+            throw new exception_view_emptyzone();
 
         // рекурсивно рендерим префабы для главной области
         $data = array();
@@ -38,11 +38,11 @@ class view_html extends view_interface {
         // рендерим шаблон
         $templateName = trim(self::$templateName);
         if ( ! $templateName)
-            throw new emptyViewTemplateException();
+            throw new exception_view_emptytemplate();
 
         $templateFilePath = ABS_TEMPLATE_PATH.$templateName.'.php';
         if ( ! is_readable($templateFilePath))
-            throw new noViewTemplateException();
+            throw new exception_view_notemplate();
 
         $this->setCurrentData($this->getViewTemplateDate());
         // подключаем шаблон

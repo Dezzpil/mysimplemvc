@@ -1,5 +1,5 @@
 <?php
-namespace msmvc\core;
+namespace msmvc;
 
 /**
  * Description of mvc
@@ -80,7 +80,7 @@ class mvc {
      * @param string $controllerFile (without prefix)
      * @param string $actionName
      * @param array $params
-     * @throws mvc_exception
+     * @throws exception_mvc
      */
     static function redirectController($controllerFile, $actionName, $params = array()) {
         self::instance()->run($controllerFile, $actionName, $params);
@@ -96,49 +96,13 @@ class mvc {
     
     private $controller;
     private $view;
-    
+
+    private function __clone() {}
+    private function __wakeup() {}
     private function __construct() {
-
-        // классы для работы с представлением
-        include_once 'view/interface.php';
-        include_once 'view/exceptions.php';
-        include_once 'view/prefab.php';
-        include_once 'view/asset.php';
-        include_once 'view/html.php';
-        include_once 'view/cli.php';
-
-        include_once 'request_exception.php';
-        include_once 'request.php';
-
-        // include_once 'response.php';
-
-        include_once 'mvc_exception.php';
-
-        include_once 'controller.php'; // root controller
-
 		if ( ! NO_DB_USING) {
-			// класс соединения с бд
-			include_once 'db.php';
-            include_once 'db_exception.php';
-			
-			// попробуем подключиться
 			$this->DB = db::instance();
 		}
-
-        include_once('model/ajax.php');
-        include_once('model/arr.php');
-        include_once('model/num.php');
-        include_once('model/session.php');
-        include_once('model/validator.php');
-        include_once('model/xhelp.php');
-        include_once('model/record.php');
-        include_once('model/charset.php');
-        include_once('model/str.php');
-        include_once('model/exception/record.php');
-        include_once('model/exception/norecord.php');
-        include_once('model/query/exception.php');
-        include_once('model/query/where.php');
-        include_once('model/query/order.php');
     }
 
     const KEY_CONTROLLER_NAME = 'controller';
@@ -198,14 +162,14 @@ class mvc {
      * Выполнить запрос
      * @param request $request
      * @param array $params
-     * @throws mvc_exception
+     * @throws exception_mvc
      */
     function run(request $request, $params = array()) {
         try {
             $this->exec_controller($request->get_controller_name(), $request->get_action_name(), $params);
             $this->render();
-        } catch (mvc_exception $e) {
-            throw new mvc_exception($e->message);
+        } catch (exception_mvc $e) {
+            throw new exception_mvc($e->message);
         }
     }
 
@@ -216,7 +180,9 @@ class mvc {
     function exec_controller($file_name, $action_name, $params = array()) {
 
         // подключаем файл с искомым контроллером
+        $file_name = str_replace('/', '\\', $file_name);
         $class_name = APP_NAMESPACE.'\\'.$this->defaultOpts[self::KEY_NAMESPACE_CONTROLLERS].'\\'.$file_name;
+
         $path = self::convertToPath($class_name);
 
         if (is_readable($path)) {
@@ -230,7 +196,7 @@ class mvc {
                 $this->controller->before();
 
                 if ( ! method_exists($this->controller, $action_name)) {
-                    new mvc_exception(mvc_exception::ERROR_404);
+                    new exception_mvc(exception_mvc::ERROR_404);
                 }
 
                 if (! empty($params)) {
@@ -250,11 +216,11 @@ class mvc {
             } else {
 
                 // not a controller
-                new mvc_exception(mvc_exception::ERROR_403);
+                new exception_mvc(exception_mvc::ERROR_403);
 
             }
         } else {
-            new mvc_exception(mvc_exception::ERROR_404);
+            //new mvc_exception(mvc_exception::ERROR_404);
         }
     }
 }

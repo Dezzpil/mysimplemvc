@@ -1,11 +1,13 @@
 <?php
 
-namespace msmvc\help;
+namespace msmvc\model;
 
-use msmvc\sql\query_exception;
-use msmvc\sql\query_where;
-use msmvc\sql\query_order;
-use msmvc\core\db;
+use msmvc\model\exception_norecord;
+use msmvc\model\exception_record;
+use msmvc\model\exception_query;
+use msmvc\model\query_where;
+use msmvc\model\query_order;
+use msmvc\db;
 
 /**
  * Provides simple abstraction for object mapping
@@ -28,13 +30,13 @@ class record {
 
     /**
      * @param query_where $where
-     * @throws \Exception|\msmvc\sql\query_exception
+     * @throws \Exception|\msmvc\model\exception_query
      */
     static function delete(query_where $where) {
         $query = "DELETE FROM ".static::$tbl_name.$where->get_prepared();
         try {
             db::instance()->query($query);
-        } catch (query_exception $e) {
+        } catch (exception_query $e) {
             throw $e;
         }
     }
@@ -47,8 +49,8 @@ class record {
 
     /**
      * @param $id
-     * @throws query_exception
-     * @throws norecord_exception
+     * @throws exception_query
+     * @throws exception_norecord
      */
     static function load($id) {
         if (static::$unicType == 'string') $id = '"'.$id.'"';
@@ -61,7 +63,7 @@ class record {
             return new static;
 
         } else {
-            throw new norecord_exception('No object with given id');
+            throw new exception_norecord('No object with given id');
         }
     }
 
@@ -71,7 +73,7 @@ class record {
      * @param array $limit
      * @param bool $asArray
      * @return array
-     * @throws norecord_exception
+     * @throws exception_norecord
      */
     static function get_list(
             query_where $where = null, 
@@ -101,7 +103,7 @@ class record {
         $result = db::instance()->query($query);
 
         if (empty($result)) {
-            throw new norecord_exception('No rows in '.self::$tbl_name.' in result by query '.$query);
+            throw new exception_norecord('No rows in '.static::$tbl_name.' in result by query '.$query);
         }
 
         $objects = array();
@@ -210,7 +212,7 @@ class record {
     /**
      * @return string
      * @deprecated
-     * @throws record_exception
+     * @throws exception_record
      */
     function get_id() {
         
@@ -221,18 +223,10 @@ class record {
         if ( ! empty($id) && $id !== null) {
             return $id;
         }
-        
-        throw new record_exception(
+
+        throw new exception_record(
             'Id ('.$idKey.') for essence '.static::$tbl_name.' undefined'
         );
-    }
-
-    /**
-     * @return mixed
-     * @throws record_exception
-     */
-    function getId() {
-        return $this->get_id();
     }
 
     /**
@@ -248,14 +242,14 @@ class record {
      * @return array|int|string
      */
     function remove() {
-        $query = "DELETE FROM ".static::$tbl_name." where `".self::getUnicKey()."`=".$this->getId();
+        $query = "DELETE FROM ".static::$tbl_name." where `".self::getUnicKey()."`=".$this->get_id();
         $result = db::instance()->query($query);
         return $result;
     }
 
     /**
      * 
-     * @throws query_exception
+     * @throws exception_query
      */
     function save() {
 
@@ -263,10 +257,10 @@ class record {
 
         try {
 
-            $this->getId();
+            $this->get_id();
             $this->update();
 
-        } catch (record_exception $e) {
+        } catch (\Exception $e) {
 
             $userId = $this->insert();
             $this->setId($userId);
@@ -297,7 +291,7 @@ class record {
         }
 
         $query = substr($query, 0, strlen($query) - 2);
-        $query .= " WHERE ".$idKey."=".$this->getId();
+        $query .= " WHERE ".$idKey."=".$this->get_id();
         $result = db::instance()->query($query);
         return $result;
     }
@@ -329,8 +323,8 @@ class record {
         $vals = $this->origin_vals;
 
         try {
-            $this->getId();
-        } catch (record_exception $e) {
+            $this->get_id();
+        } catch (exception_record $e) {
             $vals = $this->vals;
         }
 

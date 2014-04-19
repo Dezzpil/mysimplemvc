@@ -1,6 +1,6 @@
 <?php
 
-namespace msmvc\sql;
+namespace msmvc\model;
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.

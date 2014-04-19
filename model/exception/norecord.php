@@ -1,6 +1,6 @@
 <?php
 
-namespace msmvc\help;
+namespace msmvc\model;
 
 /**
  * No result for query by key
@@ -8,6 +8,6 @@ namespace msmvc\help;
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
  * @date Nov 26, 2013 12:05:41 AM
  */
-class norecord_exception extends \Exception {}
+class exception_norecord extends \Exception {}
 
 ?>

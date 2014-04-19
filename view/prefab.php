@@ -1,5 +1,5 @@
 <?php
-namespace msmvc\core;
+namespace msmvc;
 
 /**
  * Description of view_prefab

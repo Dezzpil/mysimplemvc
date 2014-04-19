@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace msmvc\help;
+namespace msmvc\model;
 
 
 class charset {
