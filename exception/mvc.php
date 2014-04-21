@@ -24,8 +24,10 @@ class exception_mvc extends \Exception {
         switch ($message) {
 
             case self::ERROR_404 :
+                header('HTTP/1.1 404 Not Found');
                 include(ABS_ERROR_PATH.'404.html'); die;
             case self::ERROR_403 :
+                header('HTTP/1.1 403 Forbidden');
                 include(ABS_ERROR_PATH.'403.html'); die;
 
             default :

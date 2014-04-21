@@ -12,7 +12,6 @@ use msmvc\db;
 /**
  * Provides simple abstraction for object mapping
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
- * @todo rewrite using ORM
  */
 
 class record {
@@ -68,6 +67,19 @@ class record {
     }
 
     /**
+     * @var string
+     */
+    static protected $fields = '*';
+
+    /**
+     * Установить список полей для метода get_list()
+     * @param array $list
+     */
+    static function set_fields(array $list) {
+        self::$fields = join(',', $list);
+    }
+
+    /**
      * @param query_where $where
      * @param query_order $order
      * @param array $limit
@@ -81,7 +93,9 @@ class record {
             $limit = array(),
             $asArray = false
     ) {
-        $query = "SELECT * FROM ".static::$tbl_name;
+
+        $query = "SELECT ".self::$fields." FROM ".static::$tbl_name;
+        self::$fields = '*';
         
         if ($where !== null) {
             $query .= $where->get_prepared();
@@ -111,9 +125,13 @@ class record {
 
             self::saveQueriedToClass($row);
             $obj = new static();
-           
-            if ($asArray) $objects[$row[static::$unicKey]] = $obj->toArray();
-            else $objects[$row[static::$unicKey]] = $obj;
+            if ($asArray) $obj = $obj->toArray();
+
+            if (array_key_exists(static::$unicKey, $row) === false) {
+                $objects[] = $obj;
+            } else {
+                $objects[$row[static::$unicKey]] = $obj;
+            }
         }
         
         return $objects;
@@ -201,7 +219,7 @@ class record {
      * @return mixed
      */
     function get($key) {
-        //$val = @$this->vals[$key];
+
         $val = arr::get($key, $this->vals);
         if ( ! $val) $val = $this->getOrigin($key);
 
@@ -211,13 +229,11 @@ class record {
 
     /**
      * @return string
-     * @deprecated
      * @throws exception_record
      */
     function get_id() {
         
         $idKey = static::$unicKey;
-        //$id = @$this->origin_vals[$idKey];
         $id = arr::get('id', $this->origin_vals);
 
         if ( ! empty($id) && $id !== null) {
@@ -232,7 +248,7 @@ class record {
     /**
      * @param $val
      */
-    function setId($val) {
+    protected function setId($val) {
         self::$loadedVars[static::$unicKey] = $val;
         $this->id = $val;
         $this->loadValuesFromClass();
@@ -293,6 +309,7 @@ class record {
         $query = substr($query, 0, strlen($query) - 2);
         $query .= " WHERE ".$idKey."=".$this->get_id();
         $result = db::instance()->query($query);
+
         return $result;
     }
     
@@ -320,13 +337,7 @@ class record {
      */
     function toArray() {
         $array = array();
-        $vals = $this->origin_vals;
-
-        try {
-            $this->get_id();
-        } catch (exception_record $e) {
-            $vals = $this->vals;
-        }
+        $vals = array_merge($this->origin_vals, $this->vals);
 
         foreach ($vals as $key => $val) {
             if (is_object($val)) $val = $val->toArray();

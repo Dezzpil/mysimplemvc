@@ -26,6 +26,7 @@ class session
         
     static function start() {
         session_start();
+        session_set_cookie_params(SESSION_LIFE, '/', '.'.HOST, true, true);
     }
     
     static function close() {

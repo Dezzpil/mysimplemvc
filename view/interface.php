@@ -12,6 +12,7 @@ use msmvc\model\arr;
 
 /**
  * Class view_interface
+ * @todo написать инструкцию
  * @package msmvc\core
  */
 abstract class view_interface {
@@ -65,7 +66,11 @@ abstract class view_interface {
      * @return mixed
      */
     function getViewTemplateParam($key) {
-        return @self::$templateData[$key];
+        if (array_key_exists($key, self::$templateData) !== false) {
+            return self::$templateData[$key];
+        } else {
+            return null;
+        }
     }
 
 
@@ -115,7 +120,11 @@ abstract class view_interface {
      * @return mixed
      */
     function getViewZoneParam($key) {
-        return @self::$zoneData[$key];
+        if (array_key_exists($key, self::$zoneData) !== false) {
+            return self::$zoneData[$key];
+        } else {
+            return null;
+        }
     }
 
 
@@ -128,6 +137,13 @@ abstract class view_interface {
     function setAsset(view_asset $asset) {
         self::$asset = $asset;
         return $this;
+    }
+
+    /**
+     * @return view_asset|null
+     */
+    function getAsset() {
+        return self::$asset;
     }
 
 
@@ -165,42 +181,35 @@ abstract class view_interface {
     }
 
     /**
+     * Превратить область представления в строку
+     * используется также и для префабов
      * @param $zoneFileName
-     * @param array $data
      * @param view_asset $asset
      * @return string
      * @throws exception_view_nozone
      */
-    protected function renderParts($zoneFileName, array $data = array(), view_asset $asset = null) {
+    protected function renderParts($zoneFileName, view_asset $asset) {
 
         $zoneFilePath = ABS_ZONE_PATH.$zoneFileName.'.php';
         if ( ! is_readable($zoneFilePath)) {
-            throw new exception_view_nozone();
-        }
-
-        $this->setCurrentData($data);
-
-        // буферизируем, чтобы не вывалилось раньше времени
-        ob_start();
-
-        // подключаем вид
-        if ($asset) {
-            echo $asset->stringCss();
-            include $zoneFilePath;
-            echo $asset->stringJs();
+            throw new exception_view_nozone('NO SUCH FILE: '.$zoneFilePath);
         } else {
-            include $zoneFilePath;
+            ob_start();
+                if ($asset) echo $asset->stringCss();
+                require $zoneFilePath;
+                if ($asset) echo $asset->stringJs();
+            return ob_get_clean();
         }
 
         // создаем переменную, в которую записываем рендер всего представления
-        return ob_get_clean();
+
     }
 
     /**
-     * @param $prefab
+     * @param view_prefab $prefab
      * @return string
      */
-    protected function renderPrefabs($prefab) {
+    protected function renderPrefabs(view_prefab $prefab) {
 
         if (is_array($prefab)) {
             // конкатенируем результат представлений
@@ -214,6 +223,7 @@ abstract class view_interface {
 
         $includedPrefabs = $prefab->getPrefabs();
         $data = $prefab->getData();
+        $asset = $prefab->getAsset() ? $prefab->getAsset() : view_asset::forge();
 
         if ( ! empty($includedPrefabs)) {
 
@@ -223,14 +233,19 @@ abstract class view_interface {
             }
 
             // возвращаем скомпилированное содержание
-            $result = $this->renderParts($prefab->getName(), $data, $prefab->getAsset());
-            //print_r($result);
+            foreach ($data as $key => $val) {
+                $this->setViewTemplateParam($key, $val);
+            }
+            $result = $this->renderParts($prefab->getName(), $asset);
             return $result;
 
         } else {
 
             // возвращаем скомпилированное содержание
-            return $this->renderParts($prefab->getName(), $data, $prefab->getAsset());
+            foreach ($data as $key => $val) {
+                $this->setViewTemplateParam($key, $val);
+            }
+            return $this->renderParts($prefab->getName(), $asset);
         }
     }
 

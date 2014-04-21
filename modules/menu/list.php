@@ -14,31 +14,39 @@ use msmvc\request;
  */
 class menu_list {
 
-    protected static $items = array();
-    protected static $instance = null;
+    protected static $instances = array();
 
     /**
      * @return menu_list
      */
     static function instance() {
 
-        if (static::$instance === null) {
+        $key = get_called_class();
+
+        if (
+            array_key_exists($key, self::$instances) === false ||
+            self::$instances[$key] === null
+        ) {
+
+            $menu = new static;
 
             $request = request::instance();
-            foreach (static::$items as $uri => $item) {
+            foreach ($menu->items as $uri => $item) {
                 if ($request->is_equal($uri)) {
-                    static::$items[$uri]['active'] = true;
+                    $menu->items[$uri]['active'] = true;
                 } else {
-                    static::$items[$uri]['active'] = false;
+                    $menu->items[$uri]['active'] = false;
                 }
             }
 
-            static::$instance = new static;
+            self::$instances[$key] = $menu;
         }
 
-        return static::$instance;
+        return self::$instances[$key];
 
     }
+
+    protected $items = array();
 
     protected function __construct() {}
     protected function __clone() {}
@@ -50,7 +58,7 @@ class menu_list {
      */
     function get_list() {
         $list = array();
-        foreach (static::$items as $uri => $item) {
+        foreach ($this->items as $uri => $item) {
             $menu_item = menu_item::forge()
                 ->set_uri($uri)
                 ->set_name($item['name'])

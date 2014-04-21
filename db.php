@@ -57,7 +57,7 @@ class db {
             
             return $result;
         } 
-        catch (Exception $e) {
+        catch (\Exception $e) {
             self::$last_error = new exception_query(
                 mysqli_error($this->handle),
                 mysqli_errno($this->handle)

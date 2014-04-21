@@ -3,14 +3,14 @@ namespace msmvc;
 
 /**
  * Description of assets
- *
+ * @todo assets is strong typed, change it
  * @author Nikita Dezzpil Orlov <n.dezz.orlov@gmail.com>
  */
 class view_asset {
     
     /**
      * 
-     * @return \view_asset
+     * @return view_asset
      */
     static function forge() {
         return new self;

@@ -68,29 +68,10 @@ class mvc {
     }
 
     /**
-     * @param $request
-     * @deprecated use mvc::redirectHeader($uri);
-     */
-    static function redirect($request) {
-        self::instance()->request($request);
-    }
-
-    /**
-     * @deprecated use mvc::instance()->run();
-     * @param string $controllerFile (without prefix)
-     * @param string $actionName
-     * @param array $params
-     * @throws exception_mvc
-     */
-    static function redirectController($controllerFile, $actionName, $params = array()) {
-        self::instance()->run($controllerFile, $actionName, $params);
-    }
-
-    /**
      * @param string $request
      */
     static function redirectHeader($request){
-        header($request);
+        header('Location: '.$request);
         die;
     }
     
@@ -110,7 +91,6 @@ class mvc {
     const KEY_NAMESPACE = 'namespace';
     const KEY_NAMESPACE_CONTROLLERS = 'namespace_controllers';
     const KEY_NAMESPACE_MODELS = 'namespace_models';
-    const KEY_NAMESPACE_MODULES = 'namespace_modules';
 
     private $defaultOpts = array(
         'controller'            => 'index',
@@ -118,7 +98,6 @@ class mvc {
         'namespace'             => 'newApp',
         'namespace_models'      => 'models',
         'namespace_controllers' => 'controllers',
-        'namespace_modules'     => 'modules'
     );
 
     /**
@@ -205,13 +184,7 @@ class mvc {
                     $this->controller->$action_name();
                 }
 
-//                $response = $this->controller->$action_name();
-//                if ( ! $response instanceof response) {
-//                    throw new mvc_exception('Action of controller must return response instance');
-//                }
-
                 $this->controller->after();
-                //return $response;
 
             } else {
 
@@ -220,7 +193,7 @@ class mvc {
 
             }
         } else {
-            //new mvc_exception(mvc_exception::ERROR_404);
+            new exception_mvc(exception_mvc::ERROR_404);
         }
     }
 }

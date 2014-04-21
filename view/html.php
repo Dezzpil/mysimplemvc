@@ -11,6 +11,14 @@ class view_html extends view_interface {
 
     protected $zoneString = '';
 
+    function complete() {
+
+        $this->zoneString = $this->renderZone();
+        $viewString = $this->renderTemplate();
+
+        return $viewString;
+    }
+
     protected function renderZone() {
 
         $path = trim(self::$zonePath);
@@ -24,8 +32,11 @@ class view_html extends view_interface {
         }
 
         // рендерим главную область
-        $data = array_merge($data, $this->getViewZoneData());
-        $content = self::renderParts($path, $data, self::$asset);
+        $this->setViewZoneData(array_merge($data, $this->getViewZoneData()));
+
+        //var_dump($data);die;
+        $asset = $this->getAsset() ? $this->getAsset() : view_asset::forge();
+        $content = $this->renderParts($path, $asset);
 
         // возвращается строка
         return $content;
@@ -38,11 +49,11 @@ class view_html extends view_interface {
         // рендерим шаблон
         $templateName = trim(self::$templateName);
         if ( ! $templateName)
-            throw new exception_view_emptytemplate();
+            throw new exception_view_emptytemplate('TEMPLATE DOESNT SET');
 
         $templateFilePath = ABS_TEMPLATE_PATH.$templateName.'.php';
         if ( ! is_readable($templateFilePath))
-            throw new exception_view_notemplate();
+            throw new exception_view_notemplate('NO SUCH FILE FOR TEMPLATE: '.$templateFilePath);
 
         $this->setCurrentData($this->getViewTemplateDate());
         // подключаем шаблон
@@ -52,14 +63,6 @@ class view_html extends view_interface {
 
         // возвращается строка
         return $template;
-    }
-    
-    function complete() {
-
-        $this->zoneString = $this->renderZone();
-        $viewString = $this->renderTemplate();
-
-        return $viewString;
     }
 }
 ?>
