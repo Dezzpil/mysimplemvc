@@ -197,6 +197,16 @@ class record {
      */
     function set($key, $value) {
 
+        if (is_numeric($value)) {
+            if (strpos($value, '.') !== false) {
+                $value = floatval($value);
+            } else {
+                $value = intval($value);
+            }
+        } else if (is_string($value)) {
+            $value = addslashes(strip_tags(trim($value)));
+        }
+
         $this->vals[$key] = $value;
 
         if (empty($this->origin_vals[$key])) {
@@ -297,12 +307,15 @@ class record {
         $idKey = static::$unicKey;
         $query = "UPDATE ".static::$tbl_name." SET ";
         foreach ($this->vals as $prop => $value) {
-            $query .= $prop."=";
-            $value = db::prepare_string($value);
-            if (is_string($value)) $query .= "'".$value."'";
-            elseif (is_int($value)) $query .= $value;
-            elseif (is_float($value)) $query .= $value;
-            else $query .= "'".$value."'";
+
+            $query .= '`'.$prop.'`=';
+            if (is_string($value)) {
+                $query .= "'".$value."'";
+            } else if (is_numeric($value)) {
+                $query .= $value;
+            } else {
+                $query .= "'".$value."'";
+            }
             $query .= ", ";
         }
 
@@ -314,15 +327,25 @@ class record {
     }
     
     protected function insert() {
-        $query = "insert into ".static::$tbl_name." (".join(",", array_keys($this->vals)).") values (";
+
+        $keys = array();
+        foreach ($this->vals as $key => $val) {
+            $keys[] = '`'.$key.'`';
+        }
+
+        $query = "insert into ".static::$tbl_name." (".join(",", $keys).") values (";
+
         foreach ($this->vals as $value) {
-            $value = db::prepare_string($value);
-            if (is_string($value)) $query .= "'".$value."'";
-            elseif (is_int($value)) $query .= $value;
-            elseif (is_float($value)) $query .= $value;
-            else $query .= "'".$value."'";
+
+            if (is_string($value)) {
+                $query .= "'".$value."'";
+            } else if (is_numeric($value)) {
+                $query .= $value;
+            } else $query .= "'".$value."'";
+
             $query .= ", ";
         }
+
         $query = substr($query, 0, strlen($query) - 2);
         $query .= ")";
         
